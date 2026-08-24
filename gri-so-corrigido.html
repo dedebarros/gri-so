@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRI-SO — Gilberto Rocha Imóveis</title>
+<style>
+  :root{ --azul:#3a46c8; --preto:#111; --borda:#000; }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family:Arial, Helvetica, sans-serif;
+    font-size:10.5px; color:#000; background:#e8e8ee;
+  }
+  .folha{
+    max-width:820px; margin:0 auto; background:#fff;
+    padding:22px 26px 30px; box-shadow:0 2px 14px rgba(0,0,0,.18);
+  }
+
+  /* ===== Barra de ações (não sai na impressão) ===== */
+  .acoes{
+    position:sticky; top:0; z-index:50; background:#fff;
+    max-width:820px; margin:0 auto; padding:10px 26px;
+    border-bottom:2px solid var(--azul);
+    display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+  }
+  .acoes button{
+    font:600 13px Arial, sans-serif; padding:9px 18px; border-radius:6px;
+    cursor:pointer; border:1px solid var(--azul);
+  }
+  .btn-imprimir{ background:var(--azul); color:#fff; }
+  .btn-limpar{ background:#fff; color:var(--azul); }
+  .acoes .dica{ font-size:11px; color:#555; }
+
+  /* ===== Cabeçalho ===== */
+  .cabecalho{ display:flex; align-items:center; gap:14px; margin-bottom:8px; }
+  .cabecalho img{ height:58px; }
+  .titulo-linha{
+    flex:1; display:flex; align-items:baseline; gap:6px;
+    font-size:12.5px; font-weight:bold;
+  }
+  .titulo-linha .campo{ flex:1; }
+  .titulo-linha .cod{ width:110px; flex:none; }
+
+  /* ===== Tabelas estilo Word ===== */
+  table{ width:100%; border-collapse:collapse; margin-bottom:6px; table-layout:fixed; }
+  td,th{
+    border:1px solid var(--borda); padding:3px 5px; vertical-align:middle;
+    font-size:10.5px; text-align:left; word-wrap:break-word;
+  }
+  .secao{
+    background:#d9d9d9; text-align:center; font-weight:bold;
+    letter-spacing:.4px; padding:4px;
+  }
+  .rotulo{ font-weight:bold; white-space:nowrap; }
+
+  /* ===== Campos ===== */
+  input[type=text], input[type=date]{
+    border:none; border-bottom:1px dotted #666; background:transparent;
+    font:inherit; padding:1px 2px; width:100%; outline:none;
+  }
+  input[type=text]:focus{ border-bottom:1px solid var(--azul); background:#eef0ff; }
+  .campo-inline{ display:inline-block; width:auto; }
+  td .par{ display:flex; align-items:baseline; gap:4px; }
+  td .par input{ flex:1; min-width:20px; }
+
+  /* checkboxes */
+  input[type=checkbox]{
+    width:12px; height:12px; margin:0 3px 0 0; vertical-align:-2px; accent-color:var(--azul);
+  }
+  label.chk{ white-space:nowrap; margin-right:8px; font-size:10.5px; cursor:pointer; }
+  .sn label.chk{ display:block; margin:1px 0 0; }
+  .sn br{ display:none; }
+  .sn .rotulo{ white-space:normal; font-size:10px; }
+
+  textarea{
+    width:100%; border:none; background:transparent; font:inherit;
+    resize:vertical; min-height:34px; outline:none; padding:2px;
+  }
+  textarea:focus{ background:#eef0ff; }
+
+  /* ===== Detalhes do imóvel: leitura e preenchimento ===== */
+  .bloco-desc td{
+    padding:7px 9px; line-height:1.75;
+  }
+  .bloco-desc .rotulo{
+    display:inline-block; margin:2px 9px 2px 0;
+  }
+  .bloco-desc label.chk{
+    display:inline-flex; align-items:center; gap:3px;
+    margin:3px 13px 3px 0; line-height:1.35;
+  }
+  .bloco-desc input[type=text].qtd{
+    width:42px !important; min-width:42px; text-align:center;
+  }
+  /* A ficha unificada mantém as amenidades como opções marcáveis. */
+  .detalhes-digitacao{ display:none !important; }
+  .detalhe-livre{
+    display:block; min-height:78px; margin-top:5px; padding:6px 7px;
+    border:1px solid #999; background:#fff; line-height:1.45;
+  }
+
+  /* ===== Contrato ===== */
+  .contrato{ margin-top:10px; text-align:justify; line-height:1.45; font-size:10.5px; }
+  .contrato p{ margin:5px 0; }
+  .contrato .clausula{ font-weight:bold; margin-top:8px; }
+  .lacuna{
+    border:none; border-bottom:1px solid #000; background:transparent;
+    font:inherit; text-align:center; outline:none; padding:0 2px;
+  }
+  .lacuna:focus{ background:#eef0ff; }
+  input[type=text].lacuna{ width:auto; display:inline-block; vertical-align:baseline; }
+  input[type=text].pct{ width:44px; }
+  input[type=text].extenso{ width:150px; }
+
+  /* ===== Assinaturas ===== */
+  .assinaturas{ margin-top:26px; font-size:11px; }
+  .assinaturas .linha-data{ display:flex; align-items:baseline; gap:6px; margin-bottom:30px; }
+  .linha-ass{ margin-top:32px; display:flex; align-items:baseline; gap:6px; }
+  .linha-ass .tra{ flex:1; border-bottom:1px solid #000; height:14px; }
+  .linha-ass .rot{ font-weight:bold; }
+  .creci-linha{ width:55%; }
+
+  /* ===== Abas ===== */
+  .abas-nav{
+    max-width:820px; margin:0 auto; display:flex; flex-wrap:wrap; gap:0; background:#fff;
+    padding:0 26px 8px; border-bottom:1px solid #ccc;
+  }
+  .grupo-aba{
+    flex-basis:100%; font:bold 9.5px Arial, sans-serif; color:#777;
+    letter-spacing:1.2px; text-transform:uppercase; margin-top:10px;
+  }
+  .abas-nav button{
+    font:bold 12.5px Arial, sans-serif; padding:10px 18px; cursor:pointer;
+    border:1px solid #ccc; border-bottom:none; border-radius:8px 8px 0 0;
+    background:#f0f0f4; color:#555; margin-right:6px; margin-top:8px;
+  }
+  .abas-nav button.ativa{ background:var(--azul); color:#fff; border-color:var(--azul); }
+  .aba{ display:none; }
+  .aba.ativa{ display:block; }
+
+  /* ===== Rodapé institucional ===== */
+  .rodape{
+    margin-top:18px; padding-top:6px; border-top:2px solid var(--azul);
+    text-align:center; font-size:9px; line-height:1.5; color:#222;
+  }
+  .num-pag{ text-align:right; font-size:9px; color:#444; }
+
+  /* ===== Proposta ===== */
+  .titulo-doc{
+    text-align:center; font-weight:bold; font-size:15px; letter-spacing:3px;
+    margin:4px 0 10px;
+  }
+  .intro{ text-align:justify; line-height:1.5; font-size:10.5px; margin-bottom:10px; }
+  .validade-linha{ margin:14px 0 6px; font-size:11px; }
+  .data-linha{ text-align:right; margin:18px 0 8px; font-size:11px; }
+  .ass-duplas{ display:flex; gap:40px; margin-top:44px; }
+  .ass-duplas .bloco{ flex:1; text-align:center; font-size:11px; }
+  .ass-duplas .tra, .ass-central .tra{ border-bottom:1px solid #000; height:16px; margin-bottom:4px; }
+  .ass-central{ width:60%; margin:40px auto 6px; text-align:center; font-size:11px; }
+  .notas{ font-size:10px; text-align:justify; line-height:1.45; margin-top:14px; }
+  .notas p{ margin:5px 0; }
+
+  /* ===== Procedimentos de Locação ===== */
+  .proc{ font-size:10.5px; line-height:1.5; text-align:justify; }
+  .proc h3{
+    background:var(--azul); color:#fff; padding:5px 9px; font-size:12px;
+    letter-spacing:.5px; margin:16px 0 8px; border-radius:3px;
+  }
+  .proc h4{ margin:12px 0 4px; font-size:11px; text-transform:uppercase; letter-spacing:.4px; }
+  .proc ul, .proc ol{ margin:4px 0 10px 20px; padding:0; }
+  .proc li{ margin:3px 0; }
+  .proc ul ul{ margin:3px 0 4px 16px; }
+  .proc .destaque{
+    background:#eef0ff; border-left:3px solid var(--azul);
+    padding:7px 9px; margin:10px 0; page-break-inside:avoid;
+  }
+  .proc table{ margin:6px 0 10px; }
+  .proc h3, .proc h4{ page-break-after:avoid; }
+
+  /* ===== Celular (responsivo) ===== */
+  @media screen and (max-width:700px){
+    body{ font-size:14px; }
+    .folha{ padding:12px 10px 24px; }
+
+    .acoes{ padding:10px 12px; gap:8px; }
+    .acoes button{ flex:1 1 auto; padding:13px 8px; font-size:14px; }
+    .acoes .dica{ font-size:10px; }
+
+    .abas-nav{ padding:0 10px 10px; }
+    .abas-nav button{
+      flex:1 1 46%; margin-right:6px; padding:13px 6px; font-size:12.5px;
+      border-radius:8px; border-bottom:1px solid #ccc; white-space:normal;
+    }
+    .grupo-aba{ margin-top:12px; font-size:10px; }
+
+    .cabecalho{ flex-direction:column; align-items:flex-start; gap:8px; }
+    .cabecalho img{ height:48px; }
+    .titulo-linha{ flex-wrap:wrap; font-size:14px; width:100%; }
+    .titulo-doc{ font-size:14px; letter-spacing:1px; }
+
+    /* Tabelas viram formulário vertical: cada campo em uma linha */
+    table, tbody{ display:block; width:100%; }
+    tr{ display:block; border:1px solid var(--borda); border-bottom:none; }
+    table tr:last-child{ border-bottom:1px solid var(--borda); }
+    td, th{
+      display:block; width:100% !important; border:none;
+      border-bottom:1px dashed #ccc; font-size:14px; padding:8px 8px;
+    }
+    tr td:last-child{ border-bottom:none; }
+    td.secao{ border-bottom:1px solid var(--borda); font-size:13px; padding:9px 8px; }
+    .sn br{ display:inline; }
+
+    input[type=text], input[type=date]{ font-size:15px; padding:6px 4px; min-height:30px; }
+    input[type=checkbox]{ width:19px; height:19px; vertical-align:-4px; }
+    label.chk{ font-size:14px; margin:3px 10px 3px 0; display:inline-block; }
+    textarea{ min-height:70px; font-size:15px; }
+
+    .contrato{ font-size:13.5px; line-height:1.6; }
+    .lacuna{ font-size:15px; min-height:28px; }
+    .proc{ font-size:13.5px; }
+    .proc h3{ font-size:13px; }
+    .proc h4{ font-size:12.5px; }
+
+    .bloco-desc td{ padding:11px 10px; line-height:1.8; }
+    .bloco-desc label.chk{ margin:5px 16px 5px 0; }
+    .bloco-desc input[type=text].qtd{ width:54px !important; min-width:54px; }
+    .detalhe-livre{ min-height:100px; }
+
+    .assinaturas{ font-size:13px; }
+    .ass-duplas{ flex-direction:column; gap:26px; }
+    .rodape{ font-size:10px; }
+  }
+
+  /* ===== Impressão ===== */
+  @page{ size:A4; margin:11mm 10mm; }
+  @media print{
+    body{ background:#fff; font-size:10px; }
+    .secao, .proc h3, .proc .destaque, .abas-nav button.ativa{
+      -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important;
+    }
+    .proc h3{ border:1px solid var(--azul); }
+    textarea{ overflow:visible; }
+    .acoes, .abas-nav{ display:none !important; }
+    .aba{ display:none !important; }
+    .aba.ativa{ display:block !important; }
+    .folha{ max-width:none; box-shadow:none; padding:0; }
+    input, textarea, .lacuna{ border-color:#000 !important; background:transparent !important; }
+    /* O conteúdo flui naturalmente entre as páginas. Quebras rígidas
+       criavam grandes áreas em branco na proposta de compra. */
+    .quebra{ break-before:auto; page-break-before:auto; }
+    tr, .bloco-desc{ break-inside:avoid; page-break-inside:avoid; }
+    .bloco-desc td{ padding:5px 7px; line-height:1.55; }
+    .bloco-desc label.chk{ margin:2px 10px 2px 0; }
+    .detalhe-livre{ min-height:58px; border-color:#000 !important; }
+    textarea{ resize:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="acoes">
+  <span style="font:bold 15px Arial,sans-serif;color:var(--azul);letter-spacing:1px">GRI-SO <small style="font-size:10px;color:#888;font-weight:normal">v1.5.1</small></span>
+  <button class="btn-imprimir" onclick="imprimir()" title="Imprime a aba que estiver aberta">🖨️ Imprimir / Salvar PDF</button>
+  <button class="btn-imprimir" style="background:#fff;color:var(--azul)" onclick="salvar()">💾 Salvar preenchida</button>
+  <button class="btn-limpar" onclick="limpar()">Limpar</button>
+  <span class="dica">⚠️ Abra este arquivo no navegador (Chrome/Edge/Safari) para os botões funcionarem — na prévia do app eles ficam bloqueados.</span>
+  <span class="dica" style="margin-left:auto">Desenvolvido por André Barros Costa</span>
+</div>
+
+<div class="abas-nav">
+  <span class="grupo-aba">Captação de Imóveis</span>
+  <button id="btn-aba-captacao" class="ativa" onclick="mudarAba('captacao')">📋 Ficha de Captação (Venda e Locação)</button>
+  <button id="btn-aba-proposta" onclick="mudarAba('proposta')">🏠 Proposta de Compra</button>
+  <span class="grupo-aba">Locação — Processo de Captação (Locador)</span>
+  <button id="btn-aba-proc-captacao" onclick="mudarAba('proc-captacao')">🗂️ Procedimentos de Captação</button>
+  <button id="btn-aba-contrato-adm" onclick="mudarAba('contrato-adm')">📝 Contrato de Administração</button>
+  <span class="grupo-aba">Locação — Processo p/ Propensos Inquilinos (Locatário)</span>
+  <button id="btn-aba-proc-inquilinos" onclick="mudarAba('proc-inquilinos')">👥 Procedimentos p/ Inquilinos</button>
+  <button id="btn-aba-proposta-loc" onclick="mudarAba('proposta-loc')">🧾 Proposta de Locação (Obrigatória)</button>
+  <button id="btn-aba-contrato-prel" onclick="mudarAba('contrato-prel')">🤝 Contrato Preliminar</button>
+</div>
+
+<div class="folha">
+
+<!-- ================================================== -->
+<!-- ===== FICHA ANTERIOR MANTIDA OCULTA COMO FONTE DA LOGOMARCA ===== -->
+<!-- ================================================== -->
+<div class="aba" id="aba-captacao-anterior">
+
+  <!-- CABEÇALHO -->
+  <div class="cabecalho">
+    <img src="data:image/jpeg;base64,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" alt="Gilberto Rocha Imóveis — CRECI J-1285">
+    <div class="titulo-linha">
+      <span>Ficha de captação de Imóvel:</span>
+      <input type="text" class="campo" id="f_titulo_anterior">
+      <span>Cod:</span>
+      <input type="text" class="cod campo-inline" id="f_cod_anterior" style="width:110px">
+    </div>
+  </div>
+
+  <!-- ===== DADOS DO IMÓVEL ===== -->
+  <table>
+    <tr>
+      <td colspan="12">
+        <span class="rotulo">TIPO DE IMÓVEL:</span>&nbsp;
+        <label class="chk"><input type="checkbox" name="tipo"> Casa</label>
+        <label class="chk"><input type="checkbox" name="tipo"> Apartamento</label>
+        <label class="chk"><input type="checkbox" name="tipo"> Terreno</label>
+        <label class="chk"><input type="checkbox" name="tipo"> Sobrado</label>
+        <label class="chk"><input type="checkbox" name="tipo"> Comercial</label>
+        <label class="chk"><input type="checkbox" name="tipo"> Fazenda/Rural</label>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="8"><div class="par"><span class="rotulo">Endereço:</span><input type="text"></div></td>
+      <td colspan="4"><div class="par"><span class="rotulo">Bairro:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="8"><div class="par"><span class="rotulo">Complemento:</span><input type="text"></div></td>
+      <td colspan="4"><div class="par"><span class="rotulo">CEP:</span><input type="text" class="cep" maxlength="9"></div></td>
+    </tr>
+    <tr>
+      <td colspan="2"><span class="rotulo">Valor Venda R$:</span><input type="text" class="dinheiro"></td>
+      <td colspan="2"><span class="rotulo">Valor Aluguel R$:</span><input type="text" class="dinheiro"></td>
+      <td colspan="2"><span class="rotulo">Tx condomínio R$:</span><input type="text" class="dinheiro"></td>
+      <td colspan="1"><span class="rotulo">M²:</span><input type="text"></td>
+      <td colspan="2" class="sn"><span class="rotulo">Financia?</span><br>
+        <label class="chk"><input type="checkbox" name="financia"> SIM</label>
+        <label class="chk"><input type="checkbox" name="financia"> NÃO</label></td>
+      <td colspan="2" class="sn"><span class="rotulo">Quitado?</span><br>
+        <label class="chk"><input type="checkbox" name="quitado"> SIM</label>
+        <label class="chk"><input type="checkbox" name="quitado"> NÃO</label></td>
+      <td colspan="1" class="sn"><span class="rotulo">Exclusividade:</span><br>
+        <label class="chk"><input type="checkbox" name="exclus"> SIM</label>
+        <label class="chk"><input type="checkbox" name="exclus"> NÃO</label></td>
+    </tr>
+    <tr>
+      <td colspan="3"><div class="par"><span class="rotulo">Inscrição Municipal IPTU:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Nº Matrícula:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Cod. Energisa:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Cod. Caerd:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">Local das Chaves:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="2" class="sn"><span class="rotulo">Poço Art/Semi</span><br>
+        <label class="chk"><input type="checkbox" name="poco"> SIM</label>
+        <label class="chk"><input type="checkbox" name="poco"> NÃO</label></td>
+      <td colspan="2" class="sn"><span class="rotulo">Gás Encanado</span><br>
+        <label class="chk"><input type="checkbox" name="gas"> SIM</label>
+        <label class="chk"><input type="checkbox" name="gas"> NÃO</label></td>
+      <td colspan="2" class="sn"><span class="rotulo">Gerador</span><br>
+        <label class="chk"><input type="checkbox" name="gerador"> SIM</label>
+        <label class="chk"><input type="checkbox" name="gerador"> NÃO</label></td>
+      <td colspan="2" class="sn"><span class="rotulo">Elevador</span><br>
+        <label class="chk"><input type="checkbox" name="elevador"> SIM</label>
+        <label class="chk"><input type="checkbox" name="elevador"> NÃO</label></td>
+      <td colspan="1" class="sn"><span class="rotulo">PETs</span><br>
+        <label class="chk"><input type="checkbox" name="pets"> SIM</label>
+        <label class="chk"><input type="checkbox" name="pets"> NÃO</label></td>
+      <td colspan="2" class="sn"><span class="rotulo">Placa Local</span><br>
+        <label class="chk"><input type="checkbox" name="placa"> SIM</label>
+        <label class="chk"><input type="checkbox" name="placa"> NÃO</label></td>
+      <td colspan="1"><span class="rotulo">VALIDADE:</span><br>
+        <div class="par"><input type="text" style="width:40px"> <span>dias</span></div></td>
+    </tr>
+  </table>
+
+  <!-- ===== DADOS PESSOAIS DO PROPRIETÁRIO ===== -->
+  <table>
+    <tr><td colspan="12" class="secao">DADOS PESSOAIS DO PROPRIETÁRIO</td></tr>
+    <tr>
+      <td colspan="8"><div class="par"><span class="rotulo">NOME:</span><input type="text"></div></td>
+      <td colspan="4"><div class="par"><span class="rotulo">CPF/CNPJ:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="3"><div class="par"><span class="rotulo">RG:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">ÓRGÃO EMISSOR:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">ESTADO CIVIL:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">PROFISSÃO:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="5"><div class="par"><span class="rotulo">*Telefone:</span><input type="text" class="fone" maxlength="15"></div></td>
+      <td colspan="7"><div class="par"><span class="rotulo">*E-mail:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="6"><div class="par"><span class="rotulo">Endereço:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Nº:</span><input type="text"></div></td>
+      <td colspan="4"><div class="par"><span class="rotulo">Bairro:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="3"><div class="par"><span class="rotulo">Cep:</span><input type="text" class="cep" maxlength="9"></div></td>
+      <td colspan="4"><div class="par"><span class="rotulo">Complemento:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">Cidade:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Estado:</span><input type="text"></div></td>
+    </tr>
+  </table>
+
+  <!-- ===== DADOS BANCÁRIOS ===== -->
+  <table>
+    <tr><td colspan="10" class="secao">DADOS BANCÁRIOS P/ PAGAMENTO AO PROPRIETÁRIO</td></tr>
+    <tr>
+      <td colspan="1"><div class="par"><span class="rotulo">Cod:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">Banco:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Agência:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Nº conta:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Chave Pix:</span><input type="text"></div></td>
+    </tr>
+  </table>
+
+  <!-- ===== DETALHES DO IMÓVEL ===== -->
+  <table>
+    <tr><td class="secao">DETALHES DO IMÓVEL</td></tr>
+    <tr class="bloco-desc"><td><span class="rotulo">AMBIENTES:</span><textarea rows="2"></textarea></td></tr>
+    <tr class="bloco-desc"><td><span class="rotulo">ACABAMENTOS:</span><textarea rows="2"></textarea></td></tr>
+    <tr class="bloco-desc"><td><span class="rotulo">LAZER:</span><textarea rows="2"></textarea></td></tr>
+    <tr class="bloco-desc"><td><span class="rotulo">INFRAESTRUTURA:</span><textarea rows="2"></textarea></td></tr>
+    <tr class="bloco-desc"><td><span class="rotulo">INFORMAÇÕES COMPLEMENTARES:</span><textarea rows="2"></textarea></td></tr>
+  </table>
+
+  <table>
+    <tr class="bloco-desc"><td><span class="rotulo">OBSERVAÇÕES:</span><textarea rows="3"></textarea></td></tr>
+  </table>
+
+  <!-- ===== CONTRATO ===== -->
+  <div class="contrato">
+    <p>Fica a <strong>Rocha e Souza Negócios Imobiliários</strong>, autorizada a colocação de placas, anunciar,
+    promover e intermediar a venda e/ou locação do imóvel acima escrito, reservando-nos o direito de
+    intermediação em caso de <strong>LOCAÇÃO</strong>, honorários de
+    <input type="text" class="lacuna pct">%(<input type="text" class="lacuna extenso"> por cento) do 1º aluguel, e
+    <input type="text" class="lacuna pct">%(<input type="text" class="lacuna extenso"> por cento) de administração
+    nos meses de vigência do contrato.</p>
+
+    <p>No caso de <strong>VENDA</strong>, honorário de
+    <input type="text" class="lacuna pct">%(<input type="text" class="lacuna extenso"> por cento) sobre o valor das transações.</p>
+
+    <p>Confirmo os dados fornecidos e assumo qualquer responsabilidade sobre os mesmos.</p>
+
+    <p><strong>Parágrafo único:</strong> O(A) CONTRATANTE declara estar ciente de que os honorários do CONTRATADO
+    serão devidos nos seguintes casos:</p>
+    <p>a) Em caso de exclusividade, vendas do imóvel realizadas durante a vigência deste contrato,
+    independentemente de serem conduzidas diretamente pelo CONTRATANTE ou por terceiros, incluindo
+    imobiliárias parceiras, se o COMPRADOR/LOCATÁRIO for alguém já apresentado pelo CONTRATADO;</p>
+    <p>b) Se o imóvel for vendido após o término do contrato a familiares ou representantes legais do
+    COMPRADOR/LOCATÁRIO inicialmente apresentado pelo CONTRATADO.</p>
+
+    <p class="clausula">1. AUTORIZAÇÃO PARA PROMOÇÃO DO IMÓVEL</p>
+    <p>O CONTRATANTE concede ao CONTRATADO amplos poderes para promover a venda do imóvel, incluindo o direito
+    de fotografar, anunciar e divulgar o imóvel em diversos meios, como mídias digitais, internet, site próprio
+    do CONTRATADO e redes sociais. O CONTRATADO está autorizado a empregar todos os meios eficazes e éticos para
+    assegurar a venda rápida e vantajosa do imóvel;</p>
+    <p>2.1 O CONTRATADO se compromete a realizar a promoção do imóvel de maneira profissional e atraente,
+    respeitando sempre a privacidade e as diretrizes estabelecidas pelo CONTRATANTE.</p>
+
+    <p class="clausula">3. PROPOSTAS DE TERCEIROS E NÃO EXCLUSIVIDADE</p>
+    <p>Apesar da não exclusividade deste contrato, o CONTRATANTE se compromete a notificar imediatamente o
+    CONTRATADO sobre qualquer proposta recebida de terceiros para a compra do imóvel.</p>
+
+    <p class="clausula">4. OBRIGAÇÕES DO CORRETOR</p>
+    <p>O CONTRATADO se obriga a executar a comercialização do imóvel com diligência, profissionalismo e
+    prudência, assegurando ao CONTRATANTE a melhor negociação possível.</p>
+    <p>4.1. O CONTRATADO deve manter o CONTRATANTE regularmente informado(a) sobre todas as etapas e
+    desenvolvimentos no processo de venda, incluindo visitas, propostas e negociações.</p>
+    <p>4.2. O CONTRATADO se compromete a atuar com total transparência, fornecendo ao CONTRATANTE informações
+    detalhadas e precisas sobre o mercado, potenciais compradores e quaisquer outros fatores relevantes.</p>
+
+    <p class="clausula">5. RESOLUÇÃO DE DÚVIDAS E OMISSÕES</p>
+    <p>Qualquer dúvida ou omissão neste contrato será interpretada e resolvida à luz do Código Civil Brasileiro
+    e demais legislações aplicáveis. Ambas as partes se comprometem a buscar uma solução amigável para quaisquer
+    questões ou divergências que possam surgir a partir da interpretação ou execução deste contrato.</p>
+    <p>5.1. Na ausência de uma solução amigável, as partes concordam em recorrer a mediação ou arbitragem, antes
+    de iniciar procedimentos judiciais, para resolver tais disputas de maneira eficiente e menos contenciosa.</p>
+
+    <p class="clausula">6. DO FORO</p>
+    <p>Fica eleito o Foro da Comarca de Porto Velho/RO para dirimir quaisquer disputas ou procedimentos legais
+    oriundos deste contrato. As partes renunciam expressamente a qualquer outro foro, por mais especial ou
+    privilegiado que seja, reconhecendo este como o mais adequado para a resolução de quaisquer questões
+    decorrentes deste instrumento.</p>
+  </div>
+
+  <!-- ===== CHECKLIST DE DOCUMENTAÇÃO ===== -->
+  <table style="margin-top:12px">
+    <tr>
+      <td class="secao" style="width:38%">Documentação do Imóvel:</td>
+      <td class="secao" style="width:31%">Pessoa Física:</td>
+      <td class="secao" style="width:31%">Pessoa Jurídica:</td>
+    </tr>
+    <tr>
+      <td style="vertical-align:top">
+        <label class="chk" style="display:block"><input type="checkbox"> Certidão de Inteiro Teor</label>
+        <label class="chk" style="display:block"><input type="checkbox"> Certidão Negativa de Tributos do Imóvel</label>
+        <label class="chk" style="display:block"><input type="checkbox"> Comprovante de Energia</label>
+        <label class="chk" style="display:block"><input type="checkbox"> Comprovante de Água</label>
+        <label class="chk" style="display:block"><input type="checkbox"> Taxa de Condomínio</label>
+        <label class="chk" style="display:block"><input type="checkbox"> Carnê IPTU/TRSD</label>
+      </td>
+      <td style="vertical-align:top">
+        <label class="chk" style="display:block"><input type="checkbox"> Documento de Identidade</label>
+        <label class="chk" style="display:block"><input type="checkbox"> Comprovante de estado civil</label>
+        <label class="chk" style="display:block"><input type="checkbox"> Comprovante de endereço atual</label>
+      </td>
+      <td style="vertical-align:top">
+        <label class="chk" style="display:block"><input type="checkbox"> Documento de identidade</label>
+        <label class="chk" style="display:block"><input type="checkbox"> Contrato Social e últimas alterações</label>
+        <label class="chk" style="display:block"><input type="checkbox"> Cartão CNPJ</label>
+        <label class="chk" style="display:block"><input type="checkbox"> Certidão Negativa Receita Federal</label>
+      </td>
+    </tr>
+  </table>
+
+  <!-- ===== ASSINATURAS ===== -->
+  <div class="assinaturas">
+    <div class="linha-data">
+      <span class="rot" style="font-weight:bold">Porto Velho-RO,</span>
+      <input type="text" style="width:260px; border:none; border-bottom:1px solid #000; font:inherit; outline:none" placeholder="">
+    </div>
+    <div class="linha-ass"><span class="rot">Proprietário(a):</span><span class="tra"></span></div>
+    <div class="linha-ass"><span class="rot">Corretor(a):</span><span class="tra"></span></div>
+    <div class="linha-ass creci-linha"><span class="rot">Creci-RO:</span><span class="tra"></span></div>
+  </div>
+
+  <div class="rodape">
+    Rocha e Souza Negócios Imobiliários Ltda. CNPJ 12.677.271/0001-65 CRECI – J 1285<br>
+    Rua Teófilo Marinho, 3799 - Bairro São João Bosco - Porto Velho/RO CEP 76803-838<br>
+    Telefone (69) 3224-6868 / 9910-6868 / 99341-9663
+  </div>
+
+</div><!-- /aba-captacao -->
+
+<!-- ================================================== -->
+<!-- ============ ABA 2: PROPOSTA DE COMPRA =========== -->
+<!-- ================================================== -->
+<div class="aba" id="aba-proposta">
+
+  <div class="cabecalho">
+    <img src="" alt="Gilberto Rocha Imóveis — CRECI J-1285" class="logo-gr">
+    <div style="flex:1">
+      <div class="titulo-doc">PROPOSTA&nbsp;&nbsp;DE&nbsp;&nbsp;COMPRA&nbsp;&nbsp;DE&nbsp;&nbsp;IMÓVEL</div>
+    </div>
+  </div>
+
+  <p class="intro">Tendo tomado conhecimento através da Imobiliária <strong>GILBERTO ROCHA IMÓVEIS, CRECI-RO
+  J-1285</strong> a disponibilidade da venda do imóvel abaixo descrito, venho presente formalizar a minha
+  proposta por meio do(a) Corretor(a) de Imóveis <input type="text" class="lacuna" style="width:210px">
+  CRECI-RO <input type="text" class="lacuna" style="width:90px">, para a compra do imóvel pelo preço e
+  condições aqui estabelecidos:</p>
+
+  <!-- DADOS DO IMÓVEL -->
+  <table>
+    <tr><td colspan="12" class="secao">DADOS DO IMÓVEL</td></tr>
+    <tr>
+      <td colspan="12">
+        <label class="chk"><input type="checkbox" name="ptipo"> Casa</label>
+        <label class="chk"><input type="checkbox" name="ptipo"> Apartamento</label>
+        <label class="chk"><input type="checkbox" name="ptipo"> Terreno</label>
+        <label class="chk"><input type="checkbox" name="ptipo"> Sobrado</label>
+        <label class="chk"><input type="checkbox" name="ptipo"> Comercial</label>
+        <label class="chk"><input type="checkbox" name="ptipo"> Fazenda</label>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="4"><div class="par"><span class="rotulo">Matrícula:</span><input type="text"></div></td>
+      <td colspan="4"><div class="par"><span class="rotulo">Cartório:</span><input type="text"></div></td>
+      <td colspan="4"><div class="par"><span class="rotulo">Inscrição Municipal:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="7"><div class="par"><span class="rotulo">Endereço:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Nº:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">Complemento:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="4"><div class="par"><span class="rotulo">Bairro:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">Cidade:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Estado:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">CEP:</span><input type="text" class="cep" maxlength="9"></div></td>
+    </tr>
+  </table>
+
+  <!-- PROPONENTE COMPRADOR -->
+  <table>
+    <tr><td colspan="12" class="secao">PROPONENTE COMPRADOR</td></tr>
+    <tr>
+      <td colspan="6"><div class="par"><span class="rotulo">NOME:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">RG:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">ÓRGÃO EMISSOR:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="3"><div class="par"><span class="rotulo">Nacionalidade:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">CPF:</span><input type="text" class="cpf" maxlength="14"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">ESTADO CIVIL:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">PROFISSÃO:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="5"><div class="par"><span class="rotulo">Nº Telefones:</span><input type="text" class="fone" maxlength="15"></div></td>
+      <td colspan="7"><div class="par"><span class="rotulo">Email:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="7"><div class="par"><span class="rotulo">Endereço:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Nº:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">Complemento:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="3"><div class="par"><span class="rotulo">Cep:</span><input type="text" class="cep" maxlength="9"></div></td>
+      <td colspan="4"><div class="par"><span class="rotulo">Bairro:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">Cidade:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Estado:</span><input type="text"></div></td>
+    </tr>
+  </table>
+
+  <!-- CÔNJUGE -->
+  <table>
+    <tr><td colspan="12" class="secao">CÔNJUGE PROPONENTE COMPRADOR</td></tr>
+    <tr>
+      <td colspan="6"><div class="par"><span class="rotulo">NOME:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">RG:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">ÓRGÃO EMISSOR:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="3"><div class="par"><span class="rotulo">Nacionalidade:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">CPF:</span><input type="text" class="cpf" maxlength="14"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">ESTADO CIVIL:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">PROFISSÃO:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="5"><div class="par"><span class="rotulo">Nº Telefones:</span><input type="text" class="fone" maxlength="15"></div></td>
+      <td colspan="7"><div class="par"><span class="rotulo">Email:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="7"><div class="par"><span class="rotulo">Endereço:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Nº:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">Complemento:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="3"><div class="par"><span class="rotulo">Cep:</span><input type="text" class="cep" maxlength="9"></div></td>
+      <td colspan="4"><div class="par"><span class="rotulo">Bairro:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">Cidade:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Estado:</span><input type="text"></div></td>
+    </tr>
+  </table>
+
+  <!-- VALOR E CONDIÇÕES -->
+  <table>
+    <tr><td colspan="4" class="secao">VALOR E CONDIÇÕES DE PAGAMENTO</td></tr>
+    <tr>
+      <td><span class="rotulo">Valor Proposto:</span><br><div class="par"><span class="rotulo">R$:</span><input type="text" class="dinheiro"></div></td>
+      <td><span class="rotulo">Sinal de Negócio:</span><br><div class="par"><span class="rotulo">R$:</span><input type="text" class="dinheiro"></div></td>
+      <td><span class="rotulo">Financiamento Bancário:</span><br><div class="par"><span class="rotulo">R$:</span><input type="text" class="dinheiro"></div></td>
+      <td><span class="rotulo">Recurso FGTS:</span><br><div class="par"><span class="rotulo">R$:</span><input type="text" class="dinheiro"></div></td>
+    </tr>
+  </table>
+
+  <p class="validade-linha">Proposta válida por <input type="text" class="lacuna" style="width:60px"> dias.</p>
+
+  <p class="data-linha">Porto Velho/RO, <input type="text" class="lacuna" style="width:50px"> de
+  <input type="text" class="lacuna" style="width:150px"> de 20<input type="text" class="lacuna" style="width:36px">.</p>
+
+  <div class="ass-duplas">
+    <div class="bloco"><div class="tra"></div>Proponente Comprador(a)</div>
+    <div class="bloco"><div class="tra"></div>Corretor(a) de Imóveis</div>
+  </div>
+
+  <div class="notas">
+    <p>1) Após aceita pelo(s) proprietário(s)/vendedor(es) a proposta tornar-se-á um contrato preliminar, nos
+    moldes estabelecidos no art. 462 a 466 do Código Civil, sendo que as partes se obrigam a cumpri-la no prazo
+    máximo de 07 (sete) dias contados do aceite.</p>
+    <p>2) A parte que der causa ao arrependimento ou a inexecução do contrato preliminar suportará, além das
+    perdas e danos devidas à parte inocente, o pagamento imediato dos honorários profissionais do corretor de
+    imóveis, no mesmo percentual estabelecido no contrato de intermediação, nos moldes estabelecidos no art. 725
+    do Código Civil.</p>
+  </div>
+
+  <!-- ACEITE -->
+  <table style="margin-top:14px">
+    <tr><td colspan="12" class="secao">ACEITE&nbsp;&nbsp;DA&nbsp;&nbsp;PROPOSTA</td></tr>
+    <tr>
+      <td colspan="6"><div class="par"><span class="rotulo">Nome:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">CPF:</span><input type="text" class="cpf" maxlength="14"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">Nº RG e Órgão Emissor:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="6"><div class="par"><span class="rotulo">Telefone:</span><input type="text" class="fone" maxlength="15"></div></td>
+      <td colspan="6"><div class="par"><span class="rotulo">Email:</span><input type="text"></div></td>
+    </tr>
+  </table>
+
+  <div class="ass-central"><div class="tra"></div>Vendedor(a)</div>
+
+  <div class="rodape">
+    Rocha e Souza Negócios Imobiliários Ltda. CNPJ 12.677.271/0001-65 CRECI – J 1285<br>
+    Rua Teófilo Marinho, 3799 - Bairro São João Bosco - Porto Velho/RO CEP 76803-838<br>
+    Telefone (69) 3224-6868 / 9910-6868 / 99341-9663
+  </div>
+
+</div><!-- /aba-proposta -->
+
+<!-- ================================================== -->
+<!-- ===== ABA ÚNICA: FICHA DE CAPTAÇÃO (VENDA E LOCAÇÃO) ===== -->
+<!-- Amenidades marcáveis da ficha oficial de locação. -->
+<!-- ================================================== -->
+<div class="aba ativa" id="aba-captacao">
+
+  <!-- CABEÇALHO -->
+  <div class="cabecalho">
+    <img src="" alt="Gilberto Rocha Imóveis — CRECI J-1285" class="logo-gr">
+    <div class="titulo-linha">
+      <span>Ficha de captação de Imóvel — VENDA E/OU LOCAÇÃO:</span>
+      <input type="text" class="campo" id="f_titulo">
+      <span>Cod:</span>
+      <input type="text" class="cod campo-inline" id="f_cod" style="width:110px">
+    </div>
+  </div>
+
+  <!-- ===== DADOS DO IMÓVEL ===== -->
+  <table>
+    <tr>
+      <td colspan="12">
+        <span class="rotulo">TIPO DE IMÓVEL:</span>&nbsp;
+        <label class="chk"><input type="checkbox" name="loctipo"> Casa</label>
+        <label class="chk"><input type="checkbox" name="loctipo"> Apartamento</label>
+        <label class="chk"><input type="checkbox" name="loctipo"> Terreno</label>
+        <label class="chk"><input type="checkbox" name="loctipo"> Sobrado</label>
+        <label class="chk"><input type="checkbox" name="loctipo"> Comercial</label>
+        <label class="chk"><input type="checkbox" name="loctipo"> Fazenda/Rural</label>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="8"><div class="par"><span class="rotulo">Endereço:</span><input type="text"></div></td>
+      <td colspan="4"><div class="par"><span class="rotulo">Bairro:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="8"><div class="par"><span class="rotulo">Complemento:</span><input type="text"></div></td>
+      <td colspan="4"><div class="par"><span class="rotulo">CEP:</span><input type="text" class="cep" maxlength="9"></div></td>
+    </tr>
+    <tr>
+      <td colspan="2"><span class="rotulo">Valor Venda R$:</span><input type="text" class="dinheiro"></td>
+      <td colspan="2"><span class="rotulo">Valor Aluguel R$:</span><input type="text" class="dinheiro"></td>
+      <td colspan="2"><span class="rotulo">Tx condomínio R$:</span><input type="text" class="dinheiro"></td>
+      <td colspan="1"><span class="rotulo">M²:</span><input type="text"></td>
+      <td colspan="2" class="sn"><span class="rotulo">Financia?</span><br>
+        <label class="chk"><input type="checkbox" name="lfinancia"> SIM</label>
+        <label class="chk"><input type="checkbox" name="lfinancia"> NÃO</label></td>
+      <td colspan="2" class="sn"><span class="rotulo">Quitado?</span><br>
+        <label class="chk"><input type="checkbox" name="lquitado"> SIM</label>
+        <label class="chk"><input type="checkbox" name="lquitado"> NÃO</label></td>
+      <td colspan="1" class="sn"><span class="rotulo">Exclusividade:</span><br>
+        <label class="chk"><input type="checkbox" name="lexclus"> SIM</label>
+        <label class="chk"><input type="checkbox" name="lexclus"> NÃO</label></td>
+    </tr>
+    <tr>
+      <td colspan="3"><div class="par"><span class="rotulo">Inscrição Municipal IPTU:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Nº Matrícula:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Cod. Energisa:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Cod. Caerd:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">Local das Chaves:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="2" class="sn"><span class="rotulo">Poço Art/Semi</span><br>
+        <label class="chk"><input type="checkbox" name="lpoco"> SIM</label>
+        <label class="chk"><input type="checkbox" name="lpoco"> NÃO</label></td>
+      <td colspan="2" class="sn"><span class="rotulo">Gás Encanado</span><br>
+        <label class="chk"><input type="checkbox" name="lgas"> SIM</label>
+        <label class="chk"><input type="checkbox" name="lgas"> NÃO</label></td>
+      <td colspan="2" class="sn"><span class="rotulo">Gerador</span><br>
+        <label class="chk"><input type="checkbox" name="lgerador"> SIM</label>
+        <label class="chk"><input type="checkbox" name="lgerador"> NÃO</label></td>
+      <td colspan="2" class="sn"><span class="rotulo">Elevador</span><br>
+        <label class="chk"><input type="checkbox" name="lelevador"> SIM</label>
+        <label class="chk"><input type="checkbox" name="lelevador"> NÃO</label></td>
+      <td colspan="1" class="sn"><span class="rotulo">PETs</span><br>
+        <label class="chk"><input type="checkbox" name="lpets"> SIM</label>
+        <label class="chk"><input type="checkbox" name="lpets"> NÃO</label></td>
+      <td colspan="2" class="sn"><span class="rotulo">Permite Placa Local?</span><br>
+        <label class="chk"><input type="checkbox" name="lplaca"> SIM</label>
+        <label class="chk"><input type="checkbox" name="lplaca"> NÃO</label></td>
+      <td colspan="1"><span class="rotulo">VALIDADE:</span><br>
+        <div class="par"><input type="text" style="width:40px"> <span>dias</span></div></td>
+    </tr>
+  </table>
+
+  <!-- ===== DADOS PESSOAIS DO PROPRIETÁRIO ===== -->
+  <table>
+    <tr><td colspan="12" class="secao">DADOS PESSOAIS DO PROPRIETÁRIO</td></tr>
+    <tr>
+      <td colspan="8"><div class="par"><span class="rotulo">NOME:</span><input type="text"></div></td>
+      <td colspan="4"><div class="par"><span class="rotulo">CPF:</span><input type="text" class="cpf" maxlength="14"></div></td>
+    </tr>
+    <tr>
+      <td colspan="3"><div class="par"><span class="rotulo">RG:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">ÓRGÃO EMISSOR:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">ESTADO CIVIL:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">PROFISSÃO:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="5"><div class="par"><span class="rotulo">*Telefone:</span><input type="text" class="fone" maxlength="15"></div></td>
+      <td colspan="7"><div class="par"><span class="rotulo">*E-mail:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="6"><div class="par"><span class="rotulo">Endereço:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Nº:</span><input type="text"></div></td>
+      <td colspan="4"><div class="par"><span class="rotulo">Bairro:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="3"><div class="par"><span class="rotulo">Cep:</span><input type="text" class="cep" maxlength="9"></div></td>
+      <td colspan="4"><div class="par"><span class="rotulo">Complemento:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">Cidade:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Estado:</span><input type="text"></div></td>
+    </tr>
+  </table>
+
+  <!-- ===== DADOS BANCÁRIOS ===== -->
+  <table>
+    <tr><td colspan="10" class="secao">DADOS BANCÁRIOS P/ PAGAMENTO AO PROPRIETÁRIO</td></tr>
+    <tr>
+      <td colspan="1"><div class="par"><span class="rotulo">Cod:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">Banco:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Agência:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Nº conta:</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Chave Pix:</span><input type="text"></div></td>
+    </tr>
+  </table>
+
+  <!-- ===== DETALHES DO IMÓVEL (amenidades clicáveis) ===== -->
+  <table class="detalhes-amenidades">
+    <tr><td class="secao">DETALHES DO IMÓVEL</td></tr>
+    <tr class="bloco-desc"><td>
+      <span class="rotulo">AMBIENTES:</span>
+      <label class="chk"><input type="checkbox"> Cozinha</label>
+      <label class="chk"><input type="checkbox"> Copa</label>
+      <label class="chk"><input type="checkbox"> Dorm. empregada</label>
+      <label class="chk"><input type="checkbox"> Banh. empregada</label>
+      <label class="chk"><input type="checkbox"> Despensa</label>
+      <label class="chk"><input type="checkbox"> Área de serviço</label>
+      <label class="chk"><input type="checkbox"> Lavabo</label>
+      <label class="chk"><input type="text" class="qtd" style="width:26px"> Banheiros</label>
+      <label class="chk"><input type="text" class="qtd" style="width:26px"> Dormitórios</label>
+      <label class="chk"><input type="text" class="qtd" style="width:26px"> Suítes</label>
+      <label class="chk"><input type="checkbox"> Dormitório reversível</label>
+      <label class="chk"><input type="checkbox"> Sala estar</label>
+      <label class="chk"><input type="checkbox"> Sala jantar</label>
+      <label class="chk"><input type="checkbox"> Sala de TV</label>
+      <label class="chk"><input type="checkbox"> Escritório</label>
+      <label class="chk"><input type="checkbox"> Sacada</label>
+      <label class="chk"><input type="checkbox"> Varanda gourmet</label>
+      <label class="chk"><input type="checkbox"> Varanda com Reiki</label>
+    </td></tr>
+    <tr class="bloco-desc"><td>
+      <span class="rotulo">PISO:</span>
+      <label class="chk"><input type="checkbox"> Cerâmica</label>
+      <label class="chk"><input type="checkbox"> Mármore</label>
+      <label class="chk"><input type="checkbox"> Porcelanato</label>
+      <label class="chk"><input type="checkbox"> Granito</label>
+      <label class="chk"><input type="checkbox"> Cimento queimado</label>
+      <label class="chk"><input type="checkbox"> Vinílico</label>
+      <label class="chk"><input type="checkbox"> Aquecido</label>
+      <label class="chk"><input type="checkbox"> Ardósia</label>
+      <label class="chk"><input type="checkbox"> Bloquete</label>
+      <label class="chk"><input type="checkbox"> Carpete</label>
+      <label class="chk"><input type="checkbox"> Contrapiso</label>
+      <label class="chk"><input type="checkbox"> Emborrachado</label>
+      <label class="chk"><input type="checkbox"> Laminado</label>
+      <label class="chk"><input type="checkbox"> Tábua</label>
+      <label class="chk"><input type="checkbox"> Taco de madeira</label>
+    </td></tr>
+    <tr class="bloco-desc"><td>
+      <span class="rotulo">ARMÁRIOS:</span>
+      <label class="chk"><input type="checkbox"> Cozinha</label>
+      <label class="chk"><input type="checkbox"> Despensa</label>
+      <label class="chk"><input type="checkbox"> Quartos</label>
+      <label class="chk"><input type="checkbox"> Closet</label>
+      <label class="chk"><input type="checkbox"> Sala</label>
+      <label class="chk"><input type="checkbox"> Escritório</label>
+      <label class="chk"><input type="checkbox"> Corredor</label>
+      <label class="chk"><input type="checkbox"> Banheiro</label>
+    </td></tr>
+    <tr class="bloco-desc"><td>
+      <span class="rotulo">LAZER CONDOMÍNIO:</span>
+      <label class="chk"><input type="checkbox"> Piscina</label>
+      <label class="chk"><input type="checkbox"> Sauna</label>
+      <label class="chk"><input type="checkbox"> Churrasqueira</label>
+      <label class="chk"><input type="checkbox"> Salão de festas</label>
+      <label class="chk"><input type="checkbox"> Quadra poliesportiva</label>
+      <label class="chk"><input type="checkbox"> Academia</label>
+      <label class="chk"><input type="checkbox"> Adega</label>
+      <label class="chk"><input type="checkbox"> Pista de caminhada</label>
+      <label class="chk"><input type="checkbox"> Sala de cinema</label>
+      <label class="chk"><input type="checkbox"> Sala de jogos</label>
+      <label class="chk"><input type="checkbox"> Empório</label>
+      <label class="chk"><input type="checkbox"> Espaço Pet</label>
+    </td></tr>
+    <tr class="bloco-desc"><td>
+      <span class="rotulo">INFO. ADICIONAIS:</span>
+      <label class="chk"><input type="checkbox"> Mobiliado</label>
+      <label class="chk"><input type="text" class="qtd" style="width:26px"> Vagas cobertas</label>
+      <label class="chk"><input type="text" class="qtd" style="width:26px"> Vagas descobertas</label>
+      <span class="rotulo">Tipo de vaga:</span>
+      <label class="chk"><input type="checkbox" name="lvaga"> Própria</label>
+      <label class="chk"><input type="checkbox" name="lvaga"> Rotativa</label>
+    </td></tr>
+    <tr class="bloco-desc"><td>
+      <span class="rotulo">INFRAESTRUTURA:</span>
+      <label class="chk"><input type="checkbox"> Elevador</label>
+      <label class="chk"><input type="text" class="qtd" style="width:26px"> Nº de andares</label>
+      <label class="chk"><input type="text" class="qtd" style="width:26px"> Nº do andar</label>
+      <label class="chk"><input type="checkbox"> Instalação TV a cabo</label>
+      <label class="chk"><input type="checkbox"> Tubulação ar condicionado</label>
+      <label class="chk"><input type="checkbox"> Alarme</label>
+      <label class="chk"><input type="checkbox"> Portão eletrônico</label>
+      <label class="chk"><input type="checkbox"> Interfone</label>
+      <label class="chk"><input type="checkbox"> Pé direito duplo</label>
+      <label class="chk"><input type="checkbox"> Depósito</label>
+      <label class="chk"><input type="checkbox"> Mezanino</label>
+      <label class="chk"><input type="checkbox"> Terraço</label>
+      <label class="chk"><input type="checkbox"> Jardim de inverno</label>
+      <label class="chk"><input type="checkbox"> Imóvel sem condomínio</label>
+      <label class="chk"><input type="checkbox"> Cerca elétrica</label>
+      <label class="chk"><input type="checkbox"> Segurança 24hs</label>
+      <label class="chk"><input type="checkbox"> Portaria Eletrônica</label>
+    </td></tr>
+  </table>
+
+  <table class="detalhes-digitacao">
+    <tr><td class="secao">DETALHES DO IMÓVEL</td></tr>
+    <tr class="bloco-desc"><td>
+      <span class="rotulo">AMBIENTES:</span>
+      <textarea class="detalhe-livre" rows="4" aria-label="Ambientes do imóvel"></textarea>
+    </td></tr>
+    <tr class="bloco-desc"><td>
+      <span class="rotulo">ACABAMENTOS / PISO / ARMÁRIOS:</span>
+      <textarea class="detalhe-livre" rows="4" aria-label="Acabamentos, piso e armários"></textarea>
+    </td></tr>
+    <tr class="bloco-desc"><td>
+      <span class="rotulo">LAZER / AMENIDADES:</span>
+      <textarea class="detalhe-livre" rows="4" aria-label="Lazer e amenidades"></textarea>
+    </td></tr>
+    <tr class="bloco-desc"><td>
+      <span class="rotulo">INFRAESTRUTURA:</span>
+      <textarea class="detalhe-livre" rows="4" aria-label="Infraestrutura do imóvel"></textarea>
+    </td></tr>
+    <tr class="bloco-desc"><td>
+      <span class="rotulo">INFORMAÇÕES COMPLEMENTARES:</span>
+      <textarea class="detalhe-livre" rows="4" aria-label="Informações complementares"></textarea>
+    </td></tr>
+  </table>
+
+  <table>
+    <tr class="bloco-desc"><td><span class="rotulo">OBSERVAÇÕES:</span><textarea rows="3"></textarea></td></tr>
+  </table>
+
+  <!-- ===== CHECKLIST DE DOCUMENTAÇÃO ===== -->
+  <table style="margin-top:10px">
+    <tr>
+      <td class="secao" style="width:38%">Documentação do Imóvel:</td>
+      <td class="secao" style="width:31%">Pessoa Física:</td>
+      <td class="secao" style="width:31%">Pessoa Jurídica:</td>
+    </tr>
+    <tr>
+      <td style="vertical-align:top">
+        <label class="chk" style="display:block"><input type="checkbox"> Certidão de Inteiro Teor</label>
+        <label class="chk" style="display:block"><input type="checkbox"> Certidão Negativa de Tributos do Imóvel</label>
+        <label class="chk" style="display:block"><input type="checkbox"> Comprovante de Energia</label>
+        <label class="chk" style="display:block"><input type="checkbox"> Comprovante de Água</label>
+        <label class="chk" style="display:block"><input type="checkbox"> Taxa de Condomínio</label>
+        <label class="chk" style="display:block"><input type="checkbox"> Carnê IPTU/TRSD</label>
+      </td>
+      <td style="vertical-align:top">
+        <label class="chk" style="display:block"><input type="checkbox"> Documento de Identidade</label>
+        <label class="chk" style="display:block"><input type="checkbox"> Comprovante de estado civil</label>
+        <label class="chk" style="display:block"><input type="checkbox"> Comprovante de endereço atual</label>
+      </td>
+      <td style="vertical-align:top">
+        <label class="chk" style="display:block"><input type="checkbox"> Documento de identidade</label>
+        <label class="chk" style="display:block"><input type="checkbox"> Contrato Social e últimas alterações</label>
+        <label class="chk" style="display:block"><input type="checkbox"> Cartão CNPJ</label>
+        <label class="chk" style="display:block"><input type="checkbox"> Certidão Negativa Receita Federal</label>
+      </td>
+    </tr>
+  </table>
+
+  <!-- ===== AUTORIZAÇÃO E PARTE JURÍDICA ===== -->
+  <div class="contrato">
+    <p>Fica a <strong>Rocha e Souza Negócios Imobiliários</strong> autorizada a colocar placas, anunciar,
+    fotografar, promover e intermediar a <strong>venda e/ou locação</strong> do imóvel acima descrito, reservando-se
+    o direito de intermediação em caso de <strong>LOCAÇÃO</strong>, com honorários de:</p>
+    <p><input type="text" class="lacuna pct" value="50">%(<input type="text" class="lacuna extenso" value="cinquenta"> por cento) do 1º aluguel;</p>
+    <p><input type="text" class="lacuna pct" value="10">%(<input type="text" class="lacuna extenso" value="dez"> por cento) de administração mensal durante a vigência do contrato;</p>
+    <p>No caso de <strong>VENDA</strong>, honorário de
+    <input type="text" class="lacuna pct">%(<input type="text" class="lacuna extenso"> por cento) sobre o valor da transação.</p>
+    <p>Confirmo os dados fornecidos e assumo qualquer responsabilidade sobre os mesmos.</p>
+
+    <p><strong>Parágrafo único:</strong> O(A) CONTRATANTE declara estar ciente de que os honorários do CONTRATADO
+    serão devidos nos seguintes casos:</p>
+    <p>a) Em caso de exclusividade, vendas ou locações realizadas durante a vigência deste contrato,
+    independentemente de serem conduzidas diretamente pelo CONTRATANTE ou por terceiros, incluindo
+    imobiliárias parceiras, se o COMPRADOR/LOCATÁRIO for alguém já apresentado pelo CONTRATADO;</p>
+    <p>b) Se o imóvel for vendido ou locado após o término do contrato a familiares ou representantes legais do
+    COMPRADOR/LOCATÁRIO inicialmente apresentado pelo CONTRATADO.</p>
+
+    <p class="clausula">1. AUTORIZAÇÃO PARA PROMOÇÃO DO IMÓVEL</p>
+    <p>O CONTRATANTE concede ao CONTRATADO amplos poderes para promover a venda e/ou locação do imóvel,
+    incluindo o direito de fotografar, anunciar e divulgar o imóvel em diversos meios, como mídias digitais,
+    internet, site próprio do CONTRATADO e redes sociais. O CONTRATADO está autorizado a empregar todos os
+    meios eficazes e éticos para assegurar a melhor intermediação;</p>
+    <p>1.1. O CONTRATADO se compromete a realizar a promoção do imóvel de maneira profissional e atraente,
+    respeitando sempre a privacidade e as diretrizes estabelecidas pelo CONTRATANTE.</p>
+
+    <p class="clausula">2. PROPOSTAS DE TERCEIROS E NÃO EXCLUSIVIDADE</p>
+    <p>Apesar da não exclusividade deste contrato, o CONTRATANTE se compromete a notificar imediatamente o
+    CONTRATADO sobre qualquer proposta recebida de terceiros para a compra ou locação do imóvel.</p>
+
+    <p class="clausula">3. OBRIGAÇÕES DO CORRETOR</p>
+    <p>O CONTRATADO se obriga a executar a comercialização e/ou locação do imóvel com diligência,
+    profissionalismo e prudência, assegurando ao CONTRATANTE a melhor negociação possível.</p>
+    <p>3.1. O CONTRATADO deve manter o CONTRATANTE regularmente informado(a) sobre todas as etapas e
+    desenvolvimentos do processo, incluindo visitas, propostas e negociações.</p>
+    <p>3.2. O CONTRATADO se compromete a atuar com total transparência, fornecendo ao CONTRATANTE informações
+    detalhadas e precisas sobre o mercado, potenciais compradores ou locatários e demais fatores relevantes.</p>
+
+    <p class="clausula">4. RESOLUÇÃO DE DÚVIDAS E OMISSÕES</p>
+    <p>Qualquer dúvida ou omissão neste contrato será interpretada e resolvida à luz do Código Civil Brasileiro
+    e demais legislações aplicáveis. Ambas as partes se comprometem a buscar uma solução amigável para quaisquer
+    questões ou divergências que possam surgir a partir da interpretação ou execução deste instrumento.</p>
+    <p>4.1. Na ausência de uma solução amigável, as partes concordam em recorrer à mediação ou arbitragem, antes
+    de iniciar procedimentos judiciais, para resolver tais disputas de maneira eficiente e menos contenciosa.</p>
+
+    <p class="clausula">5. DO FORO</p>
+    <p>Fica eleito o Foro da Comarca de Porto Velho/RO para dirimir quaisquer disputas ou procedimentos legais
+    oriundos deste contrato. As partes renunciam expressamente a qualquer outro foro, por mais especial ou
+    privilegiado que seja, reconhecendo este como o mais adequado para a resolução das questões decorrentes deste instrumento.</p>
+  </div>
+
+  <!-- ===== ASSINATURAS ===== -->
+  <div class="assinaturas">
+    <div class="linha-data">
+      <span class="rot" style="font-weight:bold">Porto Velho-RO,</span>
+      <input type="text" style="width:40px; border:none; border-bottom:1px solid #000; font:inherit; outline:none; text-align:center">/
+      <input type="text" style="width:40px; border:none; border-bottom:1px solid #000; font:inherit; outline:none; text-align:center">/
+      <input type="text" style="width:80px; border:none; border-bottom:1px solid #000; font:inherit; outline:none; text-align:center">
+    </div>
+    <div class="linha-ass"><span class="rot">Proprietário(a):</span><span class="tra"></span></div>
+    <div class="linha-ass"><span class="rot">Corretor(a):</span><span class="tra"></span></div>
+    <div class="linha-ass creci-linha"><span class="rot">Creci-RO:</span><span class="tra"></span></div>
+  </div>
+
+  <div class="rodape">
+    Rocha e Souza Negócios Imobiliários Ltda. CNPJ 12.677.271/0001-65 CRECI – J 1285<br>
+    Rua Teófilo Marinho, 3799 - Bairro São João Bosco - Porto Velho/RO CEP 76803-838<br>
+    Telefone (69) 3224-6868 (Recepção) / (69) 9 9341-9663 (Locação) / (69) 9 9910-6868 (Vendas)
+  </div>
+
+</div><!-- /aba-captacao -->
+
+<!-- ================================================== -->
+<!-- ==== ABA 4: PROCESSO DE CAPTAÇÃO DE LOCAÇÃO ===== -->
+<!-- ================================================== -->
+<div class="aba" id="aba-proc-captacao">
+
+  <div class="cabecalho">
+    <img src="" alt="Gilberto Rocha Imóveis — CRECI J-1285" class="logo-gr">
+    <div style="flex:1">
+      <div class="titulo-doc">PROCESSO&nbsp;&nbsp;DE&nbsp;&nbsp;CAPTAÇÃO&nbsp;&nbsp;DE&nbsp;&nbsp;LOCAÇÃO</div>
+      <div style="text-align:center;font-weight:bold;font-size:11px;letter-spacing:1px">(LOCADOR — PROPRIETÁRIO)</div>
+    </div>
+  </div>
+
+  <div class="proc">
+
+    <p><em>Olá, seja bem-vindo(a), Locador(a)! Buscando sempre a segurança e transparência em nossas locações,
+    a Imobiliária Gilberto Rocha disponibiliza o passo a passo do processo de captação de imóveis, dos contratos
+    de locação e de nossa administração:</em></p>
+
+    <h3>1. PASSO A PASSO DA CAPTAÇÃO E ADMINISTRAÇÃO</h3>
+    <ol>
+      <li>Realizamos a visita para conhecer e avaliar o valor de mercado do aluguel para a região;</li>
+      <li>Enviamos a ficha de captação, o cliente preenche, assina e nos encaminha de volta, o que nos autoriza
+      perante o CRECI-RO a fazer a inserção de placa da imobiliária e a lançar o imóvel para divulgação em nosso
+      site e mídias sociais;</li>
+      <li>Todas as visitas com os clientes são acompanhadas por um corretor, ou outro responsável da imobiliária;</li>
+      <li>Sendo efetivada a locação, assinamos o contrato de administração do imóvel e o contrato de locação, com
+      período mínimo de <strong>30 meses</strong>, podendo o inquilino, ao completar <strong>12 meses</strong>,
+      desocupar o imóvel sem pagamento de multa rescisória. Vindo a desocupar antes desse prazo, pagará a multa
+      proporcional devida, conforme contrato de locação;</li>
+      <li>Do <strong>1º aluguel</strong> a imobiliária faz jus a <strong>50% (cinquenta por cento)</strong>, e dos
+      aluguéis mensais <strong>10% (dez por cento)</strong>, a título de honorário de administração.</li>
+    </ol>
+
+    <h3>2. SERVIÇOS OFERECIDOS DENTRO DA ADMINISTRAÇÃO DE IMÓVEL DE LOCAÇÃO</h3>
+    <ul>
+      <li><strong>Análise de ficha dos pretensos locatários:</strong> renda, restrições SPC/SERASA, protestos,
+      processos judiciais, status junto à Receita Federal e histórico de índice de pontualidade de pagamento;</li>
+      <li><strong>Seguro incêndio obrigatório</strong> para o imóvel e conteúdo, custeado pelo inquilino;</li>
+      <li><strong>Ressarcimento ao LOCADOR do IPTU/TRSD</strong> proporcional ao período de vigência do contrato,
+      pago mensalmente pelo LOCATÁRIO;</li>
+      <li><strong>Garantia locatícia</strong> — uma das três opções, escolhida pelo LOCATÁRIO:
+        <ul>
+          <li><strong>FIADOR</strong> — sem restrições, renda compatível para afiançar;</li>
+          <li><strong>TÍTULO DE CAPITALIZAÇÃO</strong> — equivalente a 3x o valor da locação (aluguel + condomínio),
+          gerido pela seguradora, para resgate em caso de multas rescisórias e reparos ao final da locação
+          (contratação exclusiva pela imobiliária);</li>
+          <li><strong>FIANÇA LOCATÍCIA (SEGURO FIANÇA)</strong> — apólice com parcela mensal paga pelo inquilino,
+          com coberturas para multa rescisória, aluguel em aberto, IPTU, pintura e reparos (contratação exclusiva
+          pela imobiliária);</li>
+        </ul>
+      </li>
+      <li><strong>Contrato preliminar (ARRAS):</strong> após análise de ficha aprovada, inquilino e locador assinam
+      o contrato preliminar de locação, com pagamento de sinal (arras) equivalente a <strong>50% de 01 aluguel</strong>
+      no ato da assinatura, utilizado posteriormente para abatimento no aluguel do inquilino;</li>
+      <li><strong>1º aluguel</strong> recebido do inquilino após os 30 primeiros dias de uso do imóvel — a LEI DO
+      INQUILINATO veda a cobrança de garantia locatícia + aluguel antecipado;</li>
+      <li><strong>Vistoria completa com fotos</strong>, contratada e paga pela imobiliária, com profissional
+      terceirizada especializada, amparando o Locador no início e no final da locação;</li>
+      <li><strong>Assinatura eletrônica</strong> dos contratos pelo sistema da imobiliária, com a mesma validade
+      jurídica de assinatura em cartório, sem necessidade de certificado digital;</li>
+      <li><strong>Notas fiscais mensais e DIMOB:</strong> emissão mensal das notas das administrações e envio anual
+      do extrato completo de receitas e despesas dos aluguéis, para a Declaração do Imposto de Renda de Locador e
+      Locatário;</li>
+      <li><strong>Intermediação de manutenções</strong> no imóvel, com indicação de rede de apoio de prestadores
+      terceirizados;</li>
+      <li><strong>Departamento de Cobrança:</strong> controle assíduo do recebimento dos aluguéis, visando evitar
+      inadimplência;</li>
+      <li><strong>Datas fixas de vencimento:</strong> o locatário pode optar pelos dias <strong>03, 13 ou 23</strong>;
+      quando a data de início do contrato difere do vencimento escolhido, paga os dias proporcionais de aluguel e
+      condomínio para adequação;</li>
+      <li><strong>Aluguéis via BOLETO BANCÁRIO</strong>, com compensação na conta da imobiliária em 02 dias úteis
+      após o pagamento pelo locatário;</li>
+      <li><strong>Extrato mensal detalhado de repasse</strong> dos aluguéis, disparado automaticamente pelo sistema
+      da imobiliária para o e-mail do Locador;</li>
+      <li><strong>Departamento Jurídico</strong>, para resguardar os direitos e deveres do LOCADOR.</li>
+    </ul>
+
+    <h3>3. DOCUMENTAÇÃO PARA CAPTAÇÃO DE IMÓVEL — AO LOCADOR</h3>
+    <table>
+      <tr>
+        <td class="secao" style="width:38%">Documentação do Imóvel</td>
+        <td class="secao" style="width:31%">Pessoa Física</td>
+        <td class="secao" style="width:31%">Pessoa Jurídica</td>
+      </tr>
+      <tr>
+        <td style="vertical-align:top">
+          1- Certidão de Inteiro Teor ou Contrato de compra e venda, com metragem do imóvel
+          (<strong>em nome do LOCADOR/PROPRIETÁRIO</strong>);<br>
+          2- Inscrição Municipal (IPTU);<br>
+          3- Comprovante de Energia;<br>
+          4- Comprovante de Água;<br>
+          5- Taxa de Condomínio;<br>
+          6- Contato da ADMINISTRAÇÃO e SÍNDICO do condomínio.
+        </td>
+        <td style="vertical-align:top">
+          1- Documento de Identidade (RG e CPF ou CNH);<br>
+          2- Comprovante de endereço atual;<br>
+          3- E-mail (<strong>indispensável para assinatura eletrônica</strong>);<br>
+          4- Telefone atual (de preferência com WhatsApp);<br>
+          5- Dados bancários com Chave Pix (para repasse dos aluguéis).
+        </td>
+        <td style="vertical-align:top">
+          1- Contrato Social e últimas alterações;<br>
+          2- Cartão CNPJ;<br>
+          3- Identidade dos proprietários e sócios (RG e CPF ou CNH);<br>
+          4- Comprovante de endereço dos sócios;<br>
+          5- E-mail dos sócios (<strong>indispensável</strong>);<br>
+          6- Telefone de cada sócio;<br>
+          7- Dados bancários de cada proprietário, com Chave Pix.
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3" style="font-size:9.5px"><strong>OBS.</strong> Serão recebidas no setor de locação somente as
+        captações preenchidas e assinadas pelo LOCADOR e CORRETOR, devidamente acompanhadas da documentação acima,
+        completa e legível.</td>
+      </tr>
+    </table>
+
+    <h3>4. DOCUMENTOS OFICIAIS DESTA ETAPA</h3>
+    <div class="destaque">
+      Documentos da pasta <strong>PROCESSO DE CAPTAÇÃO DE LOCAÇÃO</strong>, a serem utilizados nesta etapa:
+      <ul style="margin-bottom:2px">
+        <li>☑️ <strong>Ficha/Autorização de Captação de Imóvel</strong> (aba "Captação de Locação" deste sistema —
+        Word editável 2025 disponível na pasta);</li>
+        <li>☑️ <strong>Contrato de Administração de Locação Gilberto Rocha Imóveis 2026</strong> (assinado junto com
+        o contrato de locação, quando efetivada a locação);</li>
+        <li>☑️ <strong>Lista de Documentos — Locador/Imóvel/Captação</strong> (checklist da seção 3 acima);</li>
+        <li>☑️ <strong>Procedimentos Captação e Administração Locação 2026</strong> (entregue ao locador).</li>
+      </ul>
+    </div>
+
+    <div class="destaque">
+      <strong>Setor de Locação — Gilberto Rocha Imóveis</strong><br>
+      Samantha Minosso — Gestora de Locação<br>
+      Telefone: (69) 9 9341-9663 &nbsp;|&nbsp; E-mail: gilbertorocha.locacao@gmail.com
+    </div>
+
+  </div>
+
+  <div class="rodape">
+    Rocha e Souza Negócios Imobiliários Ltda. CNPJ 12.677.271/0001-65 CRECI – J 1285<br>
+    Rua Teófilo Marinho, 3799 - Bairro São João Bosco - Porto Velho/RO CEP 76803-838<br>
+    Telefone (69) 3224-6868 (Recepção) / (69) 9 9341-9663 (Locação) / (69) 9 9910-6868 (Vendas)
+  </div>
+
+</div><!-- /aba-proc-captacao -->
+
+<!-- ================================================== -->
+<!-- ===== ABA: CONTRATO DE ADMINISTRAÇÃO (LOCADOR) === -->
+<!-- ================================================== -->
+<div class="aba" id="aba-contrato-adm">
+
+  <div class="cabecalho">
+    <img src="" alt="Gilberto Rocha Imóveis — CRECI J-1285" class="logo-gr">
+    <div style="flex:1">
+      <div class="titulo-doc">CONTRATO&nbsp;&nbsp;DE&nbsp;&nbsp;ADMINISTRAÇÃO&nbsp;&nbsp;DE&nbsp;&nbsp;IMÓVEL&nbsp;&nbsp;DE&nbsp;&nbsp;LOCAÇÃO</div>
+      <div style="text-align:right;font-size:10px">IDENTIFICADOR: <input type="text" class="lacuna" style="width:160px"></div>
+    </div>
+  </div>
+
+  <div class="contrato">
+    <p>O (a) <strong>Contratante</strong>, <input type="text" class="lacuna" style="width:260px" placeholder="NOME PROPRIETÁRIO">,
+    de nacionalidade brasileira, inscrito (a) sob o CPF N° <input type="text" class="lacuna cpf" maxlength="14" style="width:120px">,
+    RG N° <input type="text" class="lacuna" style="width:100px">, <input type="text" class="lacuna" style="width:110px" placeholder="ÓRGÃO EXPEDIDOR">,
+    residente e domiciliado (a) à <input type="text" class="lacuna" style="width:300px" placeholder="ENDEREÇO PROPRIETÁRIO">,
+    firma o presente contrato junto à <strong>Contratada, ROCHA E SOUZA NEGÓCIOS IMOBILIÁRIOS</strong>, empresa estabelecida nesta
+    cidade sito à Rua Teófilo Marinho, esquina com Av. Imigrantes, Nº 3799, São João Bosco, Porto Velho-RO, CEP 76.803-838,
+    inscrita sob o <strong>CNPJ Nº 12.677.271/0001-65</strong>, neste ato representada pelo sócio administrador <strong>GILBERTO
+    ROCHA QUINTILIANO DE SOUZA FILHO</strong>, brasileiro, solteiro, empresário, inscrito sob o <strong>CPF nº 025.027.162-17</strong>,
+    RG nº 1484780, SSP/RO, residente e domiciliado na Avenida dos Imigrantes, 5.726, Bairro Rio Madeira, na cidade de Porto Velho,
+    Estado de Rondônia, CEP 76.821-356, e-mail: gilbertorocha.locacao@gmail.com, telefone: 69 99341-9663, o qual nomeia como
+    bastante procurador, e outorga poderes para administrar o imóvel de sua propriedade, localizado no endereço estipulado na
+    Cláusula 1ª do presente contrato. Podendo para tanto, a mandatária praticar, além de todos os atos que se fizerem necessários
+    ao fiel cumprimento deste mandato, os seguintes: contratar, alterar, prorrogar, assinar termos aditivos contratuais, rescindir
+    locações, fazer acordos de novos valores, escolher os LOCATÁRIOS e fiadores, vistoriar o imóvel, assinar termo de vistoria de
+    entrega e recebimento de chaves, publicar anúncios, receber aluguéis e quitar recibos, fazer executar e cumprir as cláusulas
+    contratuais, inclusive representar junto à Companhia de Eletricidade, Companhia de Água e Esgoto, Prefeituras e Administrações
+    Regionais e ainda Companhia Telefônica, podendo bloquear linhas telefônicas, instaladas no imóvel locado, entregar e receber
+    chaves, pagar os impostos, taxas devidas, assinando para este fim, requerimento, papéis ou quaisquer outros documentos,
+    promover cobranças amigáveis e ou requerer despejos dos locatários por quaisquer dos pressupostos previstos na Lei 8.245/91,
+    podendo protestar o locatário, fiador, assim como defender o outorgante nas ações contra o mesmo intentadas, firmar acordo e
+    compromissos, por mais especiais que sejam para o bom e fiel cumprimento do presente mandato. Iguais poderes serão conferidos
+    ao advogado da empresa administradora, <strong>LESTER PONTES DE MENEZES JUNIOR, OAB/RO nº 2657</strong>, onde pelo presente
+    instrumento o outorgante confere ao outorgado amplos poderes para o foro em geral, com cláusula "ad-judicial et extra",
+    inclusive os ressalvados pelo art. 105 CPC, em qualquer juízo, Instância ou Tribunal, podendo propor contra quem de direito,
+    as ações competentes e defendê-lo nas contrárias, seguindo umas e outras, até final decisão usando legais e acompanhando-os,
+    conferindo-lhe ainda poderes especiais para receber citação inicial, confessar e conhecer a procedência do pedido, desistir,
+    renunciar ao direito sobre que se funda a ação, transigir, firmar compromissos ou acordos, receber e dar quitação, podendo
+    agir em juízo ou fora dele, assim como substabelecer essa a outrem, com ou sem reservas de iguais poderes, para agir em
+    conjunto ou separadamente com o substabelecido, firmam o presente, mediante os seguintes termos:</p>
+
+    <p class="clausula">CLÁUSULAS E CONDIÇÕES:</p>
+
+    <p class="clausula">Cláusula 1ª. DO IMÓVEL</p>
+    <p>Parágrafo 1.1. O (a) contratante Locador (a), ajusta com a Contratada Administradora a administração do imóvel:
+    <input type="text" class="lacuna" style="width:98%"></p>
+    <p>Parágrafo 1.2. <strong>DESCRIÇÃO DO IMÓVEL, MÓVEIS E ACESSÓRIOS:</strong> O imóvel, seus itens, móveis e acessórios serão
+    descritos no relatório de vistoria inicial que será parte integrante desta locação.</p>
+
+    <p class="clausula">Cláusula 2ª. DO PRAZO</p>
+    <p>Parágrafo 2.1. O contrato terá vigência de <strong>30 (trinta) meses iniciais</strong>, (PERÍODO DE
+    <input type="text" class="lacuna" style="width:34px">/<input type="text" class="lacuna" style="width:34px">/<input type="text" class="lacuna" style="width:56px">
+    A <input type="text" class="lacuna" style="width:34px">/<input type="text" class="lacuna" style="width:34px">/<input type="text" class="lacuna" style="width:56px">)
+    referente ao contrato de locação Nº <input type="text" class="lacuna" style="width:120px">, ao qual este instrumento
+    encontra-se vinculado. Decorrido esse prazo, e, sendo de interesse do (a) Locador (a), este se prorroga automaticamente pelo
+    mesmo período, mantendo-se válidas todas as cláusulas aqui estipuladas, salvo as alterações de prazo e valor da locação, e
+    consequentemente da administração.</p>
+    <p>Parágrafo 2.2. <strong>Por não haver predisposição legal, se houver interesse por parte do (a) locador (a) em reaver o
+    imóvel no decorrer da locação, este somente poderá fazê-lo se houver também o interesse da parte do (a) locatário (a) em
+    encerrar a locação, e somente ao completados exatos 12 meses de contrato, ficando o (a) locatário (a) isento de cobrança de
+    multa rescisória dentro desses termos.</strong></p>
+    <p>Parágrafo 2.2.1. <strong>Não será aplicada a isenção de multa rescisória especificada no parágrafo 7.3 se o desejo do
+    encerramento se der apenas por parte do (a) Locatário (a).</strong></p>
+    <p>Parágrafo 2.2.2. <strong>Caso venha o (a) LOCATÁRIO (a) a devolver o imóvel antes ou após completados os 12 meses
+    especificados no parágrafo 7.3, pagará normalmente ao (a) LOCADOR (a), a título de multa por rescisão o valor de 03 (três)
+    aluguéis, vigente à época da ocorrência do fato, calculados proporcionais ao período a viger no contrato (cálculo: valor
+    aluguel x3, dividido pelos meses totais do contrato, encontra-se o valor mensal e multiplica-se pela quantidade de meses que
+    falta viger o contrato).</strong></p>
+
+    <p class="clausula">Cláusula 3ª. DOS VALORES DA LOCAÇÃO E REAJUSTES</p>
+    <p>Parágrafo 3.1. O valor do aluguel a ser celebrado será de R$ <input type="text" class="lacuna dinheiro" style="width:110px">
+    (<input type="text" class="lacuna" style="width:220px" placeholder="valor por extenso">).</p>
+    <p>Parágrafo 3.1.2. O aluguel será reajustado a cada 12 meses com base na variação mensal positiva acumulada do IGP-M, na sua
+    deflação, pelo IPCA, INPC, nesta sequência. Na falta desses, por outro índice de reajuste criado pelo Governo Federal. Não
+    havendo nenhum índice vigente para reajuste, a negociação será feita entre as partes, através da empresa administradora.</p>
+    <p>Parágrafo 3.2. A atual taxa ordinária de condomínio é de R$ <input type="text" class="lacuna dinheiro" style="width:110px">
+    (<input type="text" class="lacuna" style="width:220px" placeholder="valor por extenso">), que será recebida mensalmente do
+    locatário, junto ao aluguel, e repassada ao Locador, para que este efetue o pagamento da mesma.</p>
+    <p>Parágrafo 3.2.1. A Taxa Ordinária de condomínio poderá sofrer reajustes de acordo com a administradora do próprio
+    condomínio, devendo a informação ser repassada pelo (a) LOCADOR (a) à imobiliária, para darmos ciência à (ao) Locatário (a)
+    do novo valor que o mesmo pagará mensalmente.</p>
+    <p>Parágrafo 3.3. O pagamento das taxas extraordinárias e taxas extras de condomínio são de responsabilidade única e exclusiva
+    do (a) Proprietário (a), não podendo, de acordo com a Lei do Inquilinato serem repassadas ao (a) Locatário (a), exceto em se
+    tratando de taxas relacionadas aos aluguéis de salões de festas, quiosques, churrasqueiras, clubes, e demais espaços e serviços
+    oferecidos pelo condomínio, que não fazem parte da taxa ordinária, devendo as informações sobre essas taxas serem repassadas
+    pelo (a) locador (a) à imobiliária, para fins de recebimento dos valores do (a) locatário (a).</p>
+    <p>Parágrafo 3.4. O gás que não estiver incluso na taxa de condomínio será devido pelo (a) Locatário (a), à parte, de acordo
+    com o consumo, e deverá ser pago mensalmente junto aos aluguéis. A informação do valor deverá ser repassada pelo (a) LOCADOR
+    (a) à Imobiliária, para darmos ciência à (ao) Locatário (a) para pagamento do valor.</p>
+
+    <p class="clausula">Cláusula 4ª. IPTU/TRSD</p>
+    <p><strong>Inscrição Municipal (</strong><input type="text" class="lacuna" style="width:160px"><strong>)</strong>: O pagamento
+    é de obrigatoriedade do (a) <strong>LOCADOR (a)</strong>, que possui legalmente o direito ao ressarcimento do valor proporcional
+    referente ao período de vigência do contrato de locação. Para tanto é indispensável que seja enviado à imobiliária o comprovante
+    de pagamento deste tributo, para que possamos receber o valor do (a) LOCATÁRIO (a) de forma parcelada junto aos aluguéis, para
+    o devido repasse ao (a) LOCADOR (a).</p>
+
+    <p class="clausula">Cláusula 5ª. DOS SERVIÇOS DA ADMINISTRAÇÃO DA IMOBILIÁRIA</p>
+    <p>Parágrafo 5.1. A Contratada Administradora fará jus, mediante efetivação de contrato de locação, a título de remuneração
+    pelos serviços que prestar ao (a) Contratante Locador (a), taxa de locação de <strong>50% (cinquenta por cento)</strong> do
+    primeiro valor de aluguel recebido, seja integral ou dias proporcionais, a cada nova contratação, e taxa de <strong>10%
+    (dez por cento)</strong> de administração sobre o valor do aluguel mensal recebido.</p>
+    <p>Parágrafo 5.2. No atraso do pagamento das despesas de Locação por parte do (a) Locatário (a), será cobrada
+    indispensavelmente <strong>multa de 10%</strong> sobre o valor total devido, mais <strong>juros de 1%</strong> ao mês, e
+    <strong>correção monetária</strong>, calculados dia a dia até o pagamento. Sobre tais valores a Contratada Administradora fará
+    jus <strong>10% (dez por cento)</strong>.</p>
+    <p>Parágrafo 5.3. Sobre multas rescisórias recebidas do (a) Locatário (a), nos contratos de locação celebrados, a contratada
+    Administradora fará jus a <strong>50% (cinquenta por cento)</strong> do valor final pago pelo (a) locatário (a), em virtude da
+    rescisão onerosa. Sendo que os demais <strong>50% (cinquenta por cento)</strong> correspondem ao (a) Locador (a).</p>
+    <p>Parágrafo 5.3.1. O valor será repassado ao (a) LOCADOR (a) <strong>em até 07 (sete) dias úteis</strong> posterior ao
+    recebimento feito pela Imobiliária.</p>
+    <p>Parágrafo 5.4. A imobiliária/Administradora realizará os seguintes serviços dentro da sua administração:</p>
+    <p>1. Análise de restrição, renda e ficha dos pretensos locatários e fiadores;</p>
+    <p>2. Contratação de seguro incêndio obrigatório para o imóvel e conteúdo, custeado pelo (a) Locatário;</p>
+    <p>3. Efetivação de Contratos de locação com uma das três garantias locatícias obrigatórias, escolhidas pelo LOCATÁRIO
+    (INQUILINO): <strong>FIADOR</strong> (sem restrições, renda compatível para afiançar), ou <strong>TÍTULO DE CAPITALIZAÇÃO</strong>
+    equivalente a 3x o valor da locação (aluguel + condomínio), gerido pela seguradora, para fins de resgate do título em caso de
+    necessidade de pagamento de multas rescisórias ao (a) Locador (a) e reparos no imóvel ao final da locação (oferecido para
+    contratação exclusiva pela imobiliária), ou <strong>FIANÇA LOCATÍCIA</strong>, onde é contratada e paga pelo inquilino uma
+    apólice com parcela mensal, com acompanhamento dos pagamentos feitos pela administração da locação, com a finalidade de
+    acionarmos a seguradora em situações de necessidade de pagamento de multa rescisória e reparos no imóvel ao finalizar o
+    contrato (oferecido para contratação exclusiva pela imobiliária);</p>
+    <p>4. Recebimento do 1º aluguel e dias proporcionais após os 30 primeiros dias de uso do imóvel, uma vez que a LEI DO
+    INQUILINATO veda que seja cobrada uma garantia locatícia (título de capitalização, fiador ou seguro fiança) juntamente com
+    aluguel antecipado, incorrendo em multa e reclusão penal ao proprietário;</p>
+    <p>5. Contratos assinados eletronicamente pelo sistema de assinatura da imobiliária, com a mesma validade jurídica de uma
+    assinatura realizada em cartório, evitando filas e custas para o (a) Locador (a) e Locatário (a); não é necessário que locador
+    e locatário tenham uma assinatura já pronta, nem de certificado digital. Toda a orientação para a assinatura será feita pela
+    Imobiliária.</p>
+    <p>6. Intermediação em caso de necessidade de manutenções no imóvel, com indicação de rede de apoio de prestadores
+    terceirizados, de confiança;</p>
+    <p>7. Controle assíduo do recebimento dos aluguéis, através do Departamento de Cobrança, visando evitar e/ou minimizar
+    inadimplências;</p>
+    <p>8. Datas fixas de vencimento dos aluguéis, visando um melhor controle do recebimento. O locatário pode optar pelas datas:
+    03, 13 ou 23. Nos casos em que a data inicial do contrato e a data de vencimento do aluguel escolhida pelo locatário sejam
+    diferentes, o mesmo paga os dias proporcionais de aluguel para adequar a data escolhida.</p>
+    <p>9. Aluguéis recebidos via ordem de pagamento (pix, doc ou Ted), ou boleto bancário, trazendo maior segurança nos
+    recebimentos.</p>
+    <p>10. À Contratada Administradora é facultada, sob sua inteira responsabilidade, a escolha do locatário e das garantias
+    fidejussórias que ele prestar, estabelecendo as condições do contrato de locação que em nome do (a) contratante locador (a)
+    firmará, observando pertinente, e obviamente, os interesses do (a) contratante.</p>
+    <p>11. Os anúncios do imóvel serão feitos a critério da Contratada Administradora, através de sites, placas e mídias
+    sociais.</p>
+    <p>12. A Imobiliária efetuará a contratação de vistoria, e disponibilizará relatório completo, com fotos, tanto no início
+    quanto no final da locação, para verificar as condições do imóvel, respaldando o (a) Locador (a), tanto no início quanto no
+    final da locação;</p>
+    <p>13. A Administradora contratada prestará assistência advocatícia ao Contratante Locador, defendendo seus direitos,
+    especificamente no que diz respeito à locação do imóvel, contudo as despesas judiciais, honorários advocatícios e as
+    indenizáveis pelo locatário e fiadores, correrão por conta do (a) Contratante Locador (a).</p>
+
+    <p class="clausula">Cláusula 6ª. DOS DEVERES DO (a) LOCADOR (a)</p>
+    <p>Parágrafo 6.1. Ao (a) LOCADOR (a) cabe à responsabilidade de reparar danos/vícios no imóvel, aparentes ou ocultos, sejam
+    eles hidráulicos, elétricos, estruturais, anteriores ou não à locação vigente, quando estes afetarem o uso, a habitabilidade
+    e a segurança do mesmo, exceto quando se tratarem de danos causados pelo uso indevido por parte do (a) locatário (a), situação
+    essa que deverá ser avaliada por um prestador capacitado, que apresentará orçamento formal da causa do dano. O prestador deverá
+    ser disponibilizado pelo (a) Locador (a), ou pela Imobiliária, ou na falta desses, por um prestador do (a) Locatário (a), com
+    anuência do (a) Locador (a). Os reparos deverão ocorrer dentro de prazos ajustados em comum acordo entre as partes, levando
+    sempre em consideração a urgência dos reparos em questão.</p>
+    <p>Parágrafo 6.2. O (a) LOCADOR (a) deverá informar a cor e marca de tintas utilizadas no imóvel, assim como realizar a
+    comprovação do estado da pintura do imóvel, se nova ou não, através de recibos/notas da compra do material utilizado na pintura
+    e da mão de obra realizada, sendo de suma importância apresentação de fotos e/ou vídeos destes, visando sempre resguardar o (a)
+    Locador (a) de qualquer questionamento em relação à pintura, para que a mesma possa ser requerida do (a) Locatário (a) ao final
+    da locação, conforme recebida ao início do contrato. Não sendo possível ao (a) Locador (a) tal comprovação, a empresa responsável
+    pela vistoria inicial e final fará o apontamento da pintura de acordo com o estado de conservação da mesma (com ou sem manchas,
+    com ou sem marcas, em bom estado de conservação ou não, e assim sucessivamente). Sendo necessário ao final da locação, a pintura
+    que não tenha sido comprovada como nova, terá feita somente a correção pelo (a) locatário (a), para ser entregue tal qual fora
+    recebida.</p>
+
+    <p class="clausula">Cláusula 7ª. DOS RECEBIMENTOS DE ALUGUÉIS E REPASSES</p>
+    <p>Parágrafo 7.1. O (a) Contratante Locador (a) estipula que é de seu interesse receber da Contratada Administradora o aluguel
+    líquido não garantido, via depósito/doc/transferência/Pix, nos dados bancários que segue: <strong>Nominal:</strong>
+    <input type="text" class="lacuna" style="width:180px">, <strong>Banco:</strong> <input type="text" class="lacuna" style="width:100px">,
+    <strong>Agência:</strong> <input type="text" class="lacuna" style="width:70px">, <strong>Conta Corrente ou Poupança (e variação):</strong>
+    <input type="text" class="lacuna" style="width:110px">, <strong>Chave Pix:</strong> <input type="text" class="lacuna" style="width:170px">.</p>
+    <p>Parágrafo 7.2. Qualquer alteração nos dados bancários deverá ser comunicada à Imobiliária/Administradora, que não sofrerá
+    qualquer tipo de penalidade por repasses realizados fora do prazo aqui estipulado, em virtude da omissão da informação acima
+    citada.</p>
+    <p>Parágrafo 7.3. <strong>A imobiliária enviará mensalmente através do sistema o relatório detalhado de repasse dos aluguéis,
+    diretamente para o e-mail do (a) Locador (a)</strong>, para acompanhamento dos valores recebidos em conta. Para tanto é
+    imprescindível que o Locador (a) mantenha seu endereço de e-mail sempre atualizado junto à Imobiliária.</p>
+    <p>Parágrafo 7.4. Não sendo efetuado o pagamento do aluguel pelo (a) locatário (a), e necessitando a Contratada Administradora
+    promover a cobrança amigável, e/ou judicial contra o (a) mesmo (a), permanece válida a obrigação do (a) CONTRATANTE em promover
+    o pagamento de todas às despesas e custas processuais.</p>
+
+    <p class="clausula">Cláusula 8ª. DAS RENOVAÇÕES</p>
+    <p>Parágrafo 8.1. Ficará a critério da Contratada Administradora celebrar novo contrato de locação, por prazo idêntico ou
+    diverso, se a locação em curso vier a ser rescindida antes do prazo previsto, seja amigável ou judicialmente.</p>
+    <p>Parágrafo 8.2. Ocorrendo a hipótese prevista no caput desta Cláusula, se obriga a Contratada Administradora dar ciência ao
+    (a) Contratante Locador (a), tudo com vistas a ser ajustado novo preço e anuência quanto ao novo prazo da locação.</p>
+    <p>Parágrafo 8.3. Havendo renovação do Contrato de Locação, por meio tácito ou expresso, o presente Contrato de administração
+    se manterá vigente pelo mesmo período do contrato de locação renovado.</p>
+
+    <p class="clausula">Cláusula 9ª. DAS MULTAS POR INFRAÇÃO E RESCISÃO</p>
+    <p>Parágrafo 9.1. Ao (a) Contratante Locador (a) será vedado celebrar contratos de locação sem expressa anuência escrita da
+    Contratada Administradora, assim como de intervir na administração do imóvel, tal como será vedado também o contato direto
+    entre LOCADOR e LOCATÁRIO, sob pena de multa equivalente a <strong>50% (cinquenta por cento)</strong> do valor de aluguel
+    vigente, que poderá ser deduzido diretamente do repasse a ser realizado ao locador, ou pago por este à Imobiliária, até 07
+    (sete) dias úteis posterior ao recebimento da notificação de infração, sendo cobrados por atraso, multa de 10% (dez por cento)
+    sobre o valor total devido, mais juros de 1% (um por cento) ao mês, e correção monetária, calculados dia a dia até o
+    pagamento.</p>
+    <p>Parágrafo 9.2. O (a) LOCADOR (a), desejando rescindir a administração antes de findo o prazo firmado neste contrato, pagará
+    à imobiliária-administradora o valor de <strong>03 (três) aluguéis</strong>, vigente à época da ocorrência do fato, calculados
+    proporcionais ao período a vigorar no contrato (cálculo: valor aluguel dividido pelos meses totais do contrato, encontra-se o
+    valor mensal e multiplica-se pela quantidade de meses que falta viger o contrato). O valor deverá ser pago nos dados bancários
+    da imobiliária na data da entrega de chaves feita ao Locador, sendo cobrados por atraso, multa de 10% sobre o valor total
+    devido, mais juros de 1% ao mês, e correção monetária, calculados dia a dia até o pagamento.</p>
+
+    <p class="clausula">Cláusula 10ª. DA VENDA</p>
+    <p>Parágrafo 10.1. As partes de comum acordo resolvem que a CONTRATADA terá prioridade na intermediação da venda do imóvel
+    objeto da presente locação, fazendo jus ao recebimento dos competentes honorários de corretagem imobiliária, acordados em
+    <strong>5% (cinco por cento)</strong> sobre o valor da venda.</p>
+
+    <p class="clausula">Cláusula 11ª.</p>
+    <p>E, por estarem assim justos e contratados, declaram ter lido atentamente todas as cláusulas, assinam e firmam as partes o
+    presente contrato, que é extensivo aos herdeiros e sucessores, ficando eleito o foro da cidade de Porto Velho/RO para dirimir
+    qualquer dúvida referente ao presente acordo, renunciando as partes a qualquer outro.</p>
+  </div>
+
+  <div class="assinaturas">
+    <div class="linha-data">
+      <span class="rot" style="font-weight:bold">Porto Velho – RO,</span>
+      <input type="text" style="width:260px; border:none; border-bottom:1px solid #000; font:inherit; outline:none">
+    </div>
+    <div class="linha-ass"><span class="rot">CONTRATANTE/LOCADOR (a):</span><span class="tra"></span></div>
+    <div class="linha-ass"><span class="rot">EMPRESA INTERMEDIADORA/ADMINISTRADORA — ROCHA E SOUZA NEGÓCIOS IMOBILIÁRIOS LTDA:</span><span class="tra"></span></div>
+  </div>
+
+  <div class="rodape">
+    Rocha e Souza Negócios Imobiliários Ltda. CNPJ 12.677.271/0001-65 CRECI – J 1285<br>
+    Rua Teófilo Marinho, 3799 - Bairro São João Bosco - Porto Velho/RO CEP 76803-838<br>
+    Telefone (69) 3224-6868 (Recepção) / (69) 9 9341-9663 (Locação) / (69) 9 9910-6868 (Vendas)
+  </div>
+
+</div><!-- /aba-contrato-adm -->
+
+
+<!-- ================================================== -->
+<!-- === ABA 5: PROCESSO PARA PROPENSOS INQUILINOS ==== -->
+<!-- ================================================== -->
+<div class="aba" id="aba-proc-inquilinos">
+
+  <div class="cabecalho">
+    <img src="" alt="Gilberto Rocha Imóveis — CRECI J-1285" class="logo-gr">
+    <div style="flex:1">
+      <div class="titulo-doc">PROCESSO&nbsp;&nbsp;PARA&nbsp;&nbsp;PROPENSOS&nbsp;&nbsp;INQUILINOS</div>
+      <div style="text-align:center;font-weight:bold;font-size:11px;letter-spacing:1px">(LOCATÁRIO — EFETIVAÇÃO DO CONTRATO DE LOCAÇÃO)</div>
+    </div>
+  </div>
+
+  <div class="proc">
+
+    <p><em>Olá, seja bem-vindo(a)! Buscando sempre a segurança e transparência em nossas locações, a Imobiliária
+    Gilberto Rocha disponibiliza o passo a passo do processo de efetivação de locação:</em></p>
+
+    <h3>1. EFETIVAÇÃO DE CONTRATO DE LOCAÇÃO — (LOCATÁRIO)</h3>
+    <ul>
+      <li><strong>ANÁLISE DE FICHA DO PRETENSO LOCATÁRIO:</strong> sem restrições em seu CPF ou CNPJ e com renda
+      mensal comprovada de pelo menos <strong>3x o valor da locação</strong> (ex.: aluguel + condomínio R$ 2.000,00
+      x3 = R$ 6.000,00). Deve possuir vínculo empregatício ou, se empresário/sócio, apresentar contrato social
+      comprovando o vínculo;</li>
+      <li><strong>PRAZO DO CONTRATO:</strong> período mínimo de <strong>30 meses</strong>, podendo o inquilino, ao
+      completar <strong>12 meses</strong>, desocupar sem multa rescisória; antes desse prazo, paga a multa
+      proporcional devida, conforme contrato de locação;</li>
+      <li><strong>GARANTIA LOCATÍCIA (OBRIGATÓRIA)</strong> — uma das três opções:
+        <ul>
+          <li><strong>TÍTULO DE CAPITALIZAÇÃO ICATU GARANTIA DE ALUGUEL</strong> — contratado exclusivamente pela
+          imobiliária; equivalente a 3x o valor da locação; pago à vista (boleto) ou parcelado no cartão de 2x a
+          18x (com taxa da máquina por parcela); devolvido ao inquilino ao final da locação corrigido pelo IPCA
+          (consultar simulação junto à imobiliária);</li>
+          <li><strong>FIADOR</strong> — sem restrições em CPF/CNPJ e renda comprovada de pelo menos 3x o valor da
+          locação, com vínculo empregatício ou contrato social. Se casado em comunhão parcial ou total de bens, o
+          cônjuge não precisa comprovar renda, mas assina o contrato (apresentar certidão de casamento ou
+          nascimento);</li>
+          <li><strong>SEGURO FIANÇA</strong> — contratado exclusivamente pela imobiliária; após análise da
+          seguradora, gera apólice com parcela fixa mensal (01 a 12x) paga junto aos aluguéis; cobre multa
+          rescisória, aluguel, reparos e pintura ao final do contrato; não tem reembolso/devolução (consultar
+          cotação junto à imobiliária);</li>
+        </ul>
+      </li>
+      <li><strong>SEGURO INCÊNDIO OBRIGATÓRIO:</strong> contratado pelo inquilino; taxa única paga no início do
+      contrato e renovada a cada 12 meses (consultar padrão da apólice e cotação junto à imobiliária);</li>
+      <li><strong>VISTORIA INICIAL:</strong> realizada antes da entrega de chaves, com relatório completo, fotos e
+      descrição minuciosa do imóvel, móveis e eletrodomésticos, contratada e paga pela imobiliária com profissional
+      terceirizada, amparando Locador e Locatário no início e no final da locação;</li>
+      <li><strong>ASSINATURA:</strong> contratos assinados eletronicamente pelo sistema da imobiliária, com a mesma
+      validade jurídica de cartório, sem necessidade de certificado digital;</li>
+      <li><strong>CONTRATO PRELIMINAR (ARRAS):</strong> após ficha aprovada, o cliente assina o contrato preliminar
+      e paga o sinal (arras) de <strong>50% de 01 aluguel</strong> no ato, valor lançado como abatimento no primeiro
+      aluguel quando o contrato de locação é efetivado;</li>
+      <li><strong>PAGAMENTO DO 1º ALUGUEL:</strong> após os <strong>30 primeiros dias de uso do imóvel</strong>
+      (a Lei do Inquilinato veda garantia locatícia + aluguel antecipado). Antes dos 30 dias paga-se somente os dias
+      proporcionais para adequação à data de vencimento escolhida, se houver;</li>
+      <li><strong>DECLARAÇÃO DOS ALUGUÉIS NO IR:</strong> emissão mensal de notas fiscais e elaboração anual da
+      DIMOB, com envio de extrato detalhado de receitas e despesas do ano anterior para a Declaração do Imposto de
+      Renda de Locador e Locatário.</li>
+    </ul>
+
+    <h3>2. DOCUMENTAÇÃO — LOCATÁRIO (INQUILINO)</h3>
+    <table>
+      <tr>
+        <td class="secao" style="width:50%">Locatário Pessoa Física</td>
+        <td class="secao" style="width:50%">Locatário Pessoa Jurídica</td>
+      </tr>
+      <tr>
+        <td style="vertical-align:top">
+          1- RG e CPF, ou CNH;<br>
+          2- Comprovante de endereço atual em nome do pretenso locatário;<br>
+          3- Comprovantes de renda aceitos:<br>
+          &nbsp;&nbsp;3.1- Últimos 6 contracheques; <em>ou</em><br>
+          &nbsp;&nbsp;3.2- Pró-labore; <em>ou</em><br>
+          &nbsp;&nbsp;3.3- Declaração de IR atual, especificando na natureza da operação que o locatário é dono ou
+          sócio de empresa; <em>ou</em><br>
+          &nbsp;&nbsp;3.4- Notas fiscais de prestação de serviço dos 3 últimos meses, compatíveis com os valores
+          mínimos exigidos e acompanhadas do contrato de prestação de serviço assinado e autenticado;<br>
+          <strong>OBS.</strong> As opções 3.2 e 3.3 só são aceitas acompanhadas do contrato social da empresa,
+          para vincular a renda ao percentual de participação do sócio;<br>
+          4- E-mail e telefone pessoal;<br>
+          5- Dados bancários com chave PIX;<br>
+          6- A análise de ficha <strong>não é aprovada</strong> com restrições no CPF/CNPJ, nem apenas com
+          Declaração e Recibo de IR sem as especificações do item 3.3.
+        </td>
+        <td style="vertical-align:top">
+          1- Contrato Social e últimas alterações;<br>
+          2- Cartão CNPJ;<br>
+          3- Inscrição Estadual e Inscrição Municipal;<br>
+          4- Balancete/faturamento dos últimos 12 meses;<br>
+          5- RG e CPF ou CNH dos proprietários/sócios e representantes;<br>
+          6- Comprovante de endereço dos sócios e representantes;<br>
+          7- E-mail e telefone individual de cada um que assinará o contrato;<br>
+          <strong>OBS.</strong> Não é possível vincular um mesmo e-mail a mais de uma pessoa no sistema de
+          assinatura eletrônica — cada signatário deve ter e-mail individual;<br>
+          8- A análise de ficha <strong>não é aprovada</strong> com restrições no CPF/CNPJ, ou se a renda da
+          empresa não for compatível com o mínimo exigido.
+        </td>
+      </tr>
+    </table>
+
+    <h3>3. DOCUMENTAÇÃO — FIADOR</h3>
+    <table>
+      <tr>
+        <td class="secao" style="width:50%">Fiador Pessoa Física</td>
+        <td class="secao" style="width:50%">Fiador Pessoa Jurídica</td>
+      </tr>
+      <tr>
+        <td style="vertical-align:top">
+          1- RG e CPF, ou CNH;<br>
+          2- Comprovante de endereço atual em nome do pretenso fiador;<br>
+          3- Comprovantes de renda aceitos:<br>
+          &nbsp;&nbsp;3.1- Últimos 6 contracheques; <em>ou</em><br>
+          &nbsp;&nbsp;3.2- Pró-labore; <em>ou</em><br>
+          &nbsp;&nbsp;3.3- Declaração de IR atual, especificando que o cliente é dono ou sócio de empresa;<br>
+          <strong>OBS.</strong> As opções 3.2 e 3.3 só são aceitas acompanhadas do contrato social da empresa;<br>
+          4- Certidão de nascimento ou casamento. <strong>Fiador(a) casado(a) em comunhão parcial/total de bens:</strong>
+          apresentar documento pessoal do cônjuge, que deverá obrigatoriamente assinar o contrato de locação;<br>
+          5- E-mail e telefone pessoais individuais do fiador e do cônjuge;<br>
+          6- A análise de ficha <strong>não é aprovada</strong> com restrições no CPF/CNPJ, nem apenas com
+          Declaração e Recibo de IR.
+        </td>
+        <td style="vertical-align:top">
+          1- Contrato Social e últimas alterações;<br>
+          2- Cartão CNPJ;<br>
+          3- Inscrição Estadual e Inscrição Municipal;<br>
+          4- Balancete dos últimos 12 meses;<br>
+          5- RG e CPF ou CNH dos proprietários/sócios e representantes;<br>
+          6- Comprovante de endereço dos sócios e representantes;<br>
+          7- E-mail e telefone individual de cada um;<br>
+          <strong>OBS.</strong> Não é possível vincular um mesmo e-mail a mais de uma pessoa no sistema de
+          assinatura eletrônica;<br>
+          8- A análise de ficha <strong>não é aprovada</strong> se houver restrições no CPF/CNPJ.
+        </td>
+      </tr>
+    </table>
+
+    <div class="destaque">
+      <strong>ATENÇÃO:</strong> INDISPENSÁVEL E-MAIL E TELEFONE INDIVIDUAIS de cada um que fará parte do contrato,
+      para assinatura eletrônica do contrato de locação pelo sistema da imobiliária (sem custas).<br>
+      <strong>OBS.</strong> A documentação deverá estar completa e legível ao ser apresentada no setor de locação
+      para análise.
+    </div>
+
+    <h3>4. DOCUMENTOS OFICIAIS DESTA ETAPA</h3>
+    <div class="destaque">
+      Documentos da pasta <strong>PROCESSO PARA PROPENSOS INQUILINOS</strong>, a serem utilizados nesta etapa:
+      <ul style="margin-bottom:2px">
+        <li>☑️ <strong>Proposta de Locação Gilberto Rocha Imóveis 2026 — OBRIGATÓRIA</strong> (preenchida pelo
+        pretenso locatário para a análise de ficha);</li>
+        <li>☑️ <strong>Lista de Documentos — Locatário/Inquilino</strong> (checklist da seção 2 acima);</li>
+        <li>☑️ <strong>Lista de Documentos — Fiador</strong> (checklist da seção 3 acima);</li>
+        <li>☑️ <strong>Contrato Preliminar de Locação de Imóvel</strong> (assinado após aprovação da ficha, com
+        pagamento das arras de 50% de 01 aluguel);</li>
+        <li>☑️ <strong>Procedimentos Efetivação Locação 2026</strong> (entregue ao pretenso locatário).</li>
+      </ul>
+    </div>
+
+    <div class="destaque">
+      <strong>Setor de Locação — Gilberto Rocha Imóveis</strong><br>
+      Samantha Minosso — Gestora de Locação<br>
+      Telefone: (69) 9 9341-9663 &nbsp;|&nbsp; E-mail: gilbertorocha.locacao@gmail.com
+    </div>
+
+  </div>
+
+  <div class="rodape">
+    Rocha e Souza Negócios Imobiliários Ltda. CNPJ 12.677.271/0001-65 CRECI – J 1285<br>
+    Rua Teófilo Marinho, 3799 - Bairro São João Bosco - Porto Velho/RO CEP 76803-838<br>
+    Telefone (69) 3224-6868 (Recepção) / (69) 9 9341-9663 (Locação) / (69) 9 9910-6868 (Vendas)
+  </div>
+
+</div><!-- /aba-proc-inquilinos -->
+
+<!-- ================================================== -->
+<!-- ===== ABA: PROPOSTA DE LOCAÇÃO (OBRIGATÓRIA) ===== -->
+<!-- ================================================== -->
+<div class="aba" id="aba-proposta-loc">
+
+  <div class="cabecalho">
+    <img src="" alt="Gilberto Rocha Imóveis — CRECI J-1285" class="logo-gr">
+    <div style="flex:1">
+      <div class="titulo-doc">PROPOSTA&nbsp;&nbsp;DE&nbsp;&nbsp;LOCAÇÃO&nbsp;&nbsp;—&nbsp;&nbsp;OBRIGATÓRIA</div>
+      <div style="text-align:center;font-weight:bold;font-size:11px;letter-spacing:1px">GILBERTO ROCHA IMÓVEIS — 2026</div>
+    </div>
+  </div>
+
+  <!-- IMÓVEL PRETENDIDO -->
+  <table>
+    <tr><td colspan="12" class="secao">IMÓVEL PRETENDIDO</td></tr>
+    <tr>
+      <td colspan="2" class="sn"><span class="rotulo">*Finalidade:</span><br>
+        <label class="chk"><input type="checkbox" name="plfinalidade"> Residencial</label>
+        <label class="chk"><input type="checkbox" name="plfinalidade"> Comercial</label></td>
+      <td colspan="4"><div class="par"><span class="rotulo">*TIPO IMÓVEL:</span><input type="text"></div></td>
+      <td colspan="6"><div class="par"><span class="rotulo">*CORRETOR:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="8"><div class="par"><span class="rotulo">*Condomínio/Endereço:</span><input type="text"></div></td>
+      <td colspan="4"><div class="par"><span class="rotulo">*Nº apto/casa/bloco:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="4"><span class="rotulo">*Valor Aluguel R$:</span><input type="text" class="dinheiro"></td>
+      <td colspan="4"><span class="rotulo">*Valor Condomínio R$:</span><input type="text" class="dinheiro"></td>
+      <td colspan="4"><span class="rotulo">*Total R$:</span><input type="text" class="dinheiro"></td>
+    </tr>
+  </table>
+
+  <!-- DADOS DO PRETENSO LOCATÁRIO -->
+  <table>
+    <tr><td colspan="12" class="secao">DADOS DO (A) PRETENSO (A) LOCATÁRIO (A)</td></tr>
+    <tr>
+      <td colspan="8"><div class="par"><span class="rotulo">*Locatário (a):</span><input type="text"></div></td>
+      <td colspan="4"><div class="par"><span class="rotulo">*CPF/CNPJ:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="4"><div class="par"><span class="rotulo">*Fone Locatário (a):</span><input type="text" class="fone" maxlength="15"></div></td>
+      <td colspan="8"><div class="par"><span class="rotulo">*E-mail:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="6"><div class="par"><span class="rotulo">*Fone recado:</span><input type="text" class="fone" maxlength="15"></div></td>
+      <td colspan="6"><div class="par"><span class="rotulo">Nome recado:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="12" style="font-size:9.5px">
+        <strong>*Locatário não pode ter restrições no CPF/CNPJ</strong>, ter vínculo empregatício CLT, funcionário público ou
+        dono/sócio de empresa, <strong>renda líquida mensal fixa EQUIVALENTE A NO MÍNIMO 3x o valor da locação</strong>
+        (aluguel + condomínio). *Será feita análise de ficha no sistema da imobiliária. Sendo aprovada e a proposta aceita
+        pelo locador, será efetivada a locação.
+      </td>
+    </tr>
+  </table>
+
+  <!-- PRAZO E VENCIMENTO -->
+  <table>
+    <tr><td colspan="12" class="secao">PRAZO DO CONTRATO E VENCIMENTO DO ALUGUEL</td></tr>
+    <tr>
+      <td colspan="12" style="font-size:9.5px">
+        <strong>* O PRAZO DE CONTRATO É DE 30 MESES</strong>, podendo o inquilino, ao completar <strong>12 meses</strong>,
+        entregar o imóvel sem multa rescisória, somente se o proprietário também desejar reaver o imóvel. Antes ou após esse
+        prazo, pagará multa conforme contrato de locação.
+      </td>
+    </tr>
+    <tr>
+      <td colspan="7"><div class="par"><span class="rotulo">* Prazos maiores que o acima estipulado, especificar:</span><input type="text"></div></td>
+      <td colspan="5">
+        <span class="rotulo">* VENCIMENTO ALUGUEL (optar por uma):</span>&nbsp;
+        <label class="chk"><input type="checkbox" name="plvenc"> Dia 03</label>
+        <label class="chk"><input type="checkbox" name="plvenc"> Dia 13</label>
+        <label class="chk"><input type="checkbox" name="plvenc"> Dia 23</label>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="12" style="font-size:9.5px"><strong>IMPORTANTE:</strong> Quando necessário, serão calculados dias
+      proporcionais de aluguel e condomínio para adequação da data de início à data de vencimento dos aluguéis escolhida
+      pelo (a) Locatário (a).</td>
+    </tr>
+  </table>
+
+  <!-- GARANTIA LOCATÍCIA -->
+  <table>
+    <tr><td colspan="12" class="secao">*GARANTIA LOCATÍCIA OBRIGATÓRIA (OPTAR POR UMA DAS TRÊS)</td></tr>
+    <tr>
+      <td colspan="12">
+        <label class="chk" style="white-space:normal"><input type="checkbox" name="plgar">
+        <strong>Título de Capitalização de Aluguel (ICATU ou PORTO SEGURO)</strong> — NÃO PASSA POR ANÁLISE DA SEGURADORA</label>
+        <div style="font-size:9.5px;margin:2px 0 4px 20px">
+          - Contratação exclusiva pela Imobiliária;<br>
+          - Locatário recebe o valor de volta ao final do contrato, corrigido;<br>
+          - Paga o equivalente a 3x o valor da locação (aluguel + condomínio), até a data da assinatura do contrato de locação.
+        </div>
+        <div style="margin-left:20px">
+          <span class="rotulo">*Pagamento Título:</span>&nbsp;
+          <label class="chk"><input type="checkbox" name="plpagtit"> 01 BOLETO À VISTA (sem acréscimo)</label>
+          <label class="chk"><input type="checkbox" name="plpagtit"> CARTÃO CRÉDITO</label>
+          <span class="rotulo">*Quantas parcelas?</span> <input type="text" style="width:40px" class="qtd">
+          <span style="font-size:9px">(2x a 18x com acréscimo da taxa da máquina por parcela; simular junto à Imobiliária)</span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="12">
+        <label class="chk" style="white-space:normal"><input type="checkbox" name="plgar">
+        <strong>Fiança Locatícia</strong> — PASSA POR ANÁLISE DA SEGURADORA (SOLICITAR COTAÇÃO JUNTO À IMOBILIÁRIA)</label>
+        <div style="font-size:9.5px;margin:2px 0 0 20px">
+          - Locatário não pode ter restrições no CPF/CNPJ;<br>
+          - Ofertada para contratação exclusivamente através da imobiliária;<br>
+          - É contratada uma apólice com coberturas como: multa rescisória, pintura interna e externa, reparos no imóvel, entre outros;<br>
+          - Locatário não recebe o valor de volta ao final do contrato;<br>
+          - Gera parcela mensal, a ser paga junto ao aluguel.
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="12">
+        <label class="chk" style="white-space:normal"><input type="checkbox" name="plgar">
+        <strong>Fiador</strong> — PASSA POR ANÁLISE DE FICHA NA IMOBILIÁRIA</label>
+        <div style="font-size:9.5px;margin:2px 0 4px 20px">
+          - Sem restrições no CPF/CNPJ, ter vínculo empregatício CLT, funcionário público ou dono/sócio de empresa, renda líquida
+          mensal fixa EQUIVALENTE A NO MÍNIMO 3x o valor da locação (aluguel + condomínio);<br>
+          - Se casado (a) em comunhão de bens, cônjuge também apresenta documentação e assina o contrato.
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="4"><div class="par"><span class="rotulo">*CPF/CNPJ Fiador:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">*Fone Fiador:</span><input type="text" class="fone" maxlength="15"></div></td>
+      <td colspan="5"><div class="par"><span class="rotulo">*E-mail Fiador:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="4"><div class="par"><span class="rotulo">*CPF cônjuge:</span><input type="text" class="cpf" maxlength="14"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">*Fone cônjuge:</span><input type="text" class="fone" maxlength="15"></div></td>
+      <td colspan="5"><div class="par"><span class="rotulo">*E-mail cônjuge:</span><input type="text"></div></td>
+    </tr>
+  </table>
+
+  <!-- DEMAIS CONDIÇÕES -->
+  <table>
+    <tr><td class="secao">DEMAIS CONDIÇÕES</td></tr>
+    <tr><td style="font-size:9.5px">
+      <strong>*SEGURO INCÊNDIO OBRIGATÓRIO</strong> — Cobertura para o imóvel e conteúdo; pago pelo inquilino; SOLICITAR COTAÇÃO
+      JUNTO À IMOBILIÁRIA. Desejando o cliente contratar por sua seguradora, verificar com a imobiliária o padrão que o seguro
+      deve seguir, e apresentar a proposta contratada assinada, com comprovante de pagamento, para efetivação do contrato de
+      locação.
+    </td></tr>
+    <tr><td style="font-size:9.5px">
+      <strong>IPTU/TRSD</strong> — Locatário pagará o valor proporcional, de acordo com a vigência do contrato de locação, à
+      vista ou parcelado.
+    </td></tr>
+    <tr><td style="font-size:9.5px">
+      <strong>VISTORIA</strong> — Feita por empresa terceirizada contratada pela Imobiliária. Entrega de chaves feita somente
+      após realizada a vistoria. Cliente receberá o relatório de vistoria dentro do prazo estipulado em contrato.
+    </td></tr>
+    <tr><td style="font-size:9.5px">
+      <strong>ENTREGA CHAVES</strong> — A imobiliária informará a data de entrega com base na demanda e ordem de contratos que
+      estejam sendo efetivados, e agenda da empresa vistoriadora. <strong>O processo de efetivação somente ocorre após o envio
+      da proposta de locação, documentação completa, e contrato preliminar assinado.</strong>
+    </td></tr>
+    <tr><td style="font-size:9.5px">
+      <strong>*ASSINATURA ELETRÔNICA DO CONTRATO</strong> — Realizada OBRIGATORIAMENTE pelo AUTENTIQUE, sistema da Imobiliária.
+      Enviaremos o link para o inquilino assinar pelo e-mail e WhatsApp.
+    </td></tr>
+    <tr><td style="font-size:9.5px">
+      <strong>RESERVA IMÓVEL</strong> — ATÉ 24hs, a partir do envio dessa proposta preenchida e assinada pelo pretenso inquilino,
+      período em que o (a) cliente deve enviar a documentação solicitada. Após esse prazo a reserva será cancelada.
+    </td></tr>
+    <tr><td style="font-size:9.5px">
+      <strong>IMPORTANTE:</strong> APÓS APROVAÇÃO DA PROPOSTA, A IMOBILIÁRIA ENVIARÁ O CONTRATO PRELIMINAR PARA O CLIENTE
+      ASSINAR, E REALIZAR O PAGAMENTO DO SINAL (ARRAS), EQUIVALENTE A <strong>50% DE 01 ALUGUEL</strong>. O VALOR PODERÁ SER
+      UTILIZADO PARA ABATIMENTO NO 1º ALUGUEL, OU PARA PAGAMENTO DO SEGURO INCÊNDIO (ESTE ÚLTIMO SE ASSIM O CLIENTE DESEJAR).
+    </td></tr>
+    <tr><td style="font-size:9.5px">
+      <strong>OBS.</strong> Todos os campos são de preenchimento obrigatório, e as informações são de uso restrito da
+      imobiliária, para a finalidade da locação, resguardando todos os dados fornecidos por nossos clientes.
+    </td></tr>
+  </table>
+
+  <div class="contrato">
+    <p><strong>*Declaro para os devidos fins que as informações aqui prestadas são verdadeiras e aceito os termos acima
+    estabelecidos.</strong></p>
+  </div>
+
+  <div class="assinaturas">
+    <div class="linha-ass"><span class="rot">Assinatura:</span><span class="tra"></span></div>
+    <div class="linha-data" style="margin-top:14px">
+      <span class="rot" style="font-weight:bold">Data:</span>
+      <input type="text" style="width:40px; border:none; border-bottom:1px solid #000; font:inherit; outline:none; text-align:center">/
+      <input type="text" style="width:40px; border:none; border-bottom:1px solid #000; font:inherit; outline:none; text-align:center">/
+      <input type="text" style="width:80px; border:none; border-bottom:1px solid #000; font:inherit; outline:none; text-align:center">
+    </div>
+  </div>
+
+  <div class="rodape">
+    Rocha e Souza Negócios Imobiliários Ltda. CNPJ 12.677.271/0001-65 CRECI – J 1285<br>
+    Rua Teófilo Marinho, 3799 - Bairro São João Bosco - Porto Velho/RO CEP 76803-838<br>
+    Telefone (69) 3224-6868 (Recepção) / (69) 9 9341-9663 (Locação) / (69) 9 9910-6868 (Vendas)
+  </div>
+
+</div><!-- /aba-proposta-loc -->
+
+<!-- ================================================== -->
+<!-- ==== ABA: CONTRATO PRELIMINAR DE LOCAÇÃO ========= -->
+<!-- ================================================== -->
+<div class="aba" id="aba-contrato-prel">
+
+  <div class="cabecalho">
+    <img src="" alt="Gilberto Rocha Imóveis — CRECI J-1285" class="logo-gr">
+    <div style="flex:1">
+      <div class="titulo-doc">CONTRATO&nbsp;&nbsp;PRELIMINAR&nbsp;&nbsp;DE&nbsp;&nbsp;LOCAÇÃO&nbsp;&nbsp;DE&nbsp;&nbsp;IMÓVEL</div>
+    </div>
+  </div>
+
+  <!-- PARTES -->
+  <table>
+    <tr><td colspan="12" class="secao">DADOS DO (A) PROPONENTE LOCADOR (A)</td></tr>
+    <tr>
+      <td colspan="8"><div class="par"><span class="rotulo">Nome:</span><input type="text"></div></td>
+      <td colspan="4"><div class="par"><span class="rotulo">CPF:</span><input type="text" class="cpf" maxlength="14"></div></td>
+    </tr>
+    <tr>
+      <td colspan="4"><div class="par"><span class="rotulo">RG:</span><input type="text"></div></td>
+      <td colspan="8"><div class="par"><span class="rotulo">Endereço:</span><input type="text"></div></td>
+    </tr>
+  </table>
+  <table>
+    <tr><td colspan="12" class="secao">DADOS DO PROPONENTE-LOCATÁRIO</td></tr>
+    <tr>
+      <td colspan="8"><div class="par"><span class="rotulo">Nome:</span><input type="text"></div></td>
+      <td colspan="4"><div class="par"><span class="rotulo">CPF:</span><input type="text" class="cpf" maxlength="14"></div></td>
+    </tr>
+    <tr>
+      <td colspan="4"><div class="par"><span class="rotulo">RG:</span><input type="text"></div></td>
+      <td colspan="8"><div class="par"><span class="rotulo">Endereço:</span><input type="text"></div></td>
+    </tr>
+  </table>
+
+  <div class="contrato">
+    <p><strong>EMPRESA ADMINISTRADORA/INTERMEDIADORA: ROCHA E SOUZA NEGÓCIOS IMOBILIÁRIOS LTDA</strong>, inscrita sob o CNPJ
+    <strong>12.677.271/0001-65</strong>, CRECI – J1285, sito à Rua Teófilo Marinho, Nº 3799, São João Bosco, Porto Velho-RO,
+    CEP 76.803-838, representada pelo sócio administrador <strong>GILBERTO ROCHA QUINTILIANO DE SOUZA FILHO</strong>, brasileiro,
+    solteiro, empresário, inscrito sob o <strong>CPF nº 025.027.162-17</strong>, RG nº 1484780, SSP/RO, residente e domiciliado na
+    Avenida dos Imigrantes, 5.726, Bairro Rio Madeira, na cidade de Porto Velho, Estado de Rondônia, CEP 76.821-356.</p>
+
+    <p><strong>Resolvem entre si, livres de qualquer vício de vontade, e em plena capacidade de direito, firmar o presente
+    contrato preliminar, conforme cláusulas e condições abaixo:</strong></p>
+
+    <p class="clausula">Cláusula 1ª.</p>
+    <p>O (a) proponente locador (a) e o (a) proponente locatário (a) acima qualificados se comprometem a celebrar contrato de
+    locação, tendo como objeto o imóvel qualificado, na forma e valores aqui especificados, sob pena de perda das arras (sinal)
+    dadas em garantia à contratação ou a sua devolução, nos termos dos artigos 417 a 419 (das arras ou sinal) e 462 a 465
+    (contrato preliminar), do Código Civil.</p>
+
+    <p class="clausula">Cláusula 2ª.</p>
+    <p>Caso o (a) proponente locador (a) desista de celebrar o contrato de locação, ficará obrigado a devolver as arras (sinal),
+    dentro do mesmo prazo especificado na Cláusula 12ª deste contrato, incorrendo nas penalidades legais pelo não cumprimento.</p>
+
+    <p class="clausula">Cláusula 3ª.</p>
+    <p>Caso a desistência se dê por parte do (a) proponente locatário (a), este (a) perderá o valor das arras em favor do (a)
+    proponente locador (a).</p>
+
+    <p class="clausula">Cláusula 4ª.</p>
+    <p>Ficam as partes cientes de que o direito de arrependimento previsto no art. 49 do CDC e seu parágrafo único
+    <strong>não</strong> se aplica ao presente negócio jurídico, haja vista não se tratar de relação de consumo.</p>
+
+    <p class="clausula">Cláusula 5ª. Imóvel objeto da locação:</p>
+    <p><input type="text" class="lacuna" style="width:98%"></p>
+
+    <p class="clausula">Cláusula 6ª. Valor do aluguel: R$ <input type="text" class="lacuna dinheiro" style="width:130px"></p>
+
+    <p class="clausula">Cláusula 7ª. Valor do condomínio (se houver): R$ <input type="text" class="lacuna dinheiro" style="width:110px"></p>
+
+    <p class="clausula">Cláusula 8ª. Prazo da locação: <input type="text" class="lacuna" style="width:70px"> (em meses)</p>
+
+    <p class="clausula">Cláusula 9ª. Vigência do contrato: Início em
+    <input type="text" class="lacuna" style="width:34px">/<input type="text" class="lacuna" style="width:34px">/<input type="text" class="lacuna" style="width:56px">
+    e término em
+    <input type="text" class="lacuna" style="width:34px">/<input type="text" class="lacuna" style="width:34px">/<input type="text" class="lacuna" style="width:56px">.</p>
+
+    <p class="clausula">Cláusula 10ª. Valor das arras: R$ <input type="text" class="lacuna dinheiro" style="width:130px"></p>
+    <p><strong>(50% DE 01 ALUGUEL SERÁ O VALOR DAS ARRAS DADAS COMO SINAL E COMPROMETIMENTO DO (A) PRETENSO LOCATÁRIO (A), PARA
+    A EFETIVAÇÃO DA LOCAÇÃO. EX: ALUGUEL R$ 4.000,00, PAGARÁ COMO SINAL R$ 2.000,00).</strong></p>
+
+    <p class="clausula">Cláusula 11ª.</p>
+    <p>As arras deverão ser pagas no ato da assinatura deste contrato, via <strong>DOC, TRANSFERÊNCIA OU PIX</strong>, nos dados
+    bancários apresentados abaixo, devendo fazer prova de tal junto à Imobiliária Administradora.</p>
+    <p><strong>Titular: ROCHA E SOUZA NEGÓCIOS IMOBILIÁRIOS LTDA, Banco: Sicoob, Agência: 3315, Conta Corrente: 660.363-7,
+    PIX (CNPJ): 12.677.271/0001-65.</strong></p>
+    <p>Parágrafo 11.1. Este contrato deverá ser assinado no prazo de <strong>24 horas</strong> do seu envio às partes aqui
+    citadas.</p>
+
+    <p class="clausula">Cláusula 12ª.</p>
+    <p>Vindo o <strong>CONTRATO DE LOCAÇÃO</strong> a ser efetivamente assinado, o valor dado como sinal será devolvido ao (a)
+    locatário (a) no prazo de até <strong>07 (sete) dias úteis</strong> após a assinatura do contrato de locação.</p>
+
+    <p class="clausula">Cláusula 13ª.</p>
+    <p>Os dados do (a) proponente-locatário (a) serão utilizados para fins de análise de ficha pela imobiliária, para averiguar a
+    viabilidade de efetivação da locação, bem como para cotações de seguro incêndio, seguro-fiança, contratação de Título de
+    capitalização de aluguel, efetivação de vistoria inicial e final junto à empresa vistoriadora, com o que concorda desde já,
+    nos termos da LGPD (Lei Geral de Proteção de Dados).</p>
+
+    <p class="clausula">Cláusula 14ª.</p>
+    <p>Vindo o (a) proponente-locatário (a) a desistir da efetivação do contrato de locação após a assinatura deste contrato
+    preliminar e de seu pagamento, perderá as arras em favor do (a) locador (a).</p>
+
+    <p class="clausula">Cláusula 15ª.</p>
+    <p>O <strong>CONTRATO DE LOCAÇÃO</strong> deverá ser assinado pelas partes em <strong>até 2 (dois) dias úteis</strong> a
+    partir do envio da minuta para leitura.</p>
+
+    <p class="clausula">Cláusula 16ª.</p>
+    <p>Este contrato preliminar tem validade de <strong>10 (dez) dias</strong> a partir de sua assinatura, mediante recibo de
+    pagamento das arras.</p>
+
+    <p><strong>Declaro, sob as penas da lei, serem verdadeiros os dados informados neste documento.</strong></p>
+  </div>
+
+  <div class="assinaturas">
+    <div class="linha-data">
+      <span class="rot" style="font-weight:bold">Porto Velho-RO,</span>
+      <input type="text" style="width:260px; border:none; border-bottom:1px solid #000; font:inherit; outline:none">
+    </div>
+    <div class="linha-ass"><span class="rot">PROPONENTE-LOCADOR (a):</span><span class="tra"></span></div>
+    <div class="linha-ass"><span class="rot">PROPONENTE-LOCATÁRIO:</span><span class="tra"></span></div>
+    <div class="linha-ass"><span class="rot">EMPRESA INTERMEDIADORA:</span><span class="tra"></span></div>
+  </div>
+
+  <div class="rodape">
+    Rocha e Souza Negócios Imobiliários Ltda. CNPJ 12.677.271/0001-65 CRECI – J 1285<br>
+    Rua Teófilo Marinho, 3799 - Bairro São João Bosco - Porto Velho/RO CEP 76803-838<br>
+    Telefone (69) 3224-6868 (Recepção) / (69) 9 9341-9663 (Locação) / (69) 9 9910-6868 (Vendas)
+  </div>
+
+</div><!-- /aba-contrato-prel -->
+
+
+
+</div>
+
+<script>
+  /* ============================================================
+     GRI-SO — Gilberto Rocha Imóveis · Sistema Operacional
+     APP_VERSION: 1.7.0
+     CHANGELOG:
+     - 1.7.0 (07/08/2026): Amenidades da ficha única exibidas como
+       opções clicáveis para venda e locação; removidas da tela
+       as áreas livres de digitação.
+     - 1.5.0 (03/08/2026): Unificadas as fichas de captação de
+       venda e locação. A ficha única usa as amenidades marcáveis
+       da captação de locação. Removida a quebra forçada da
+       proposta de compra para evitar grandes espaços em branco.
+     - 1.4.0 (24/07/2026): Layout responsivo para celular — em telas
+       pequenas os campos empilham na vertical, fontes e botões maiores
+       para toque, teclado numérico automático em valores/telefone/CPF/
+       CEP. No PC e na impressão nada muda (folha A4 preservada).
+     - 1.3.1 (24/07/2026): Impressão reforçada — faixas de seção,
+       títulos azuis dos procedimentos e destaques agora saem
+       impressos mesmo com "imprimir fundos" desligado no navegador.
+     - 1.3.0 (24/07/2026): Incluídos os 3 documentos que faltavam da
+       pasta PROCEDIMENTOS DE LOCAÇÃO: Contrato de Administração de
+       Locação 2026 (grupo Captação/Locador), Proposta de Locação 2026
+       OBRIGATÓRIA e Contrato Preliminar de Locação (grupo Propensos
+       Inquilinos). Navegação reorganizada em 3 grupos separados,
+       espelhando as pastas: VENDAS | LOCAÇÃO-CAPTAÇÃO (LOCADOR) |
+       LOCAÇÃO-PROPENSOS INQUILINOS (LOCATÁRIO).
+     - 1.2.0 (24/07/2026): Ficha de Captação de Locação refeita fiel ao
+       documento oficial "AUTORIZAÇÃO CAPTAÇÃO IMÓVEL GILBERTO ROCHA
+       IMÓVEIS - WORD EDITÁVEL 2025" (pasta PROCESSO DE CAPTAÇÃO DE
+       LOCAÇÃO): DETALHES DO IMÓVEL em checkboxes (ambientes, piso,
+       armários, lazer condomínio, info adicionais, infraestrutura),
+       campos venda+aluguel, autorização com honorários do 1º aluguel
+       + administração mensal + venda. A ficha de vendas (aba 1) segue
+       sendo a ficha_captacao_gilberto_rocha.html original.
+     - 1.1.0 (24/07/2026): Procedimentos de Locação separados em duas
+       abas, espelhando as pastas oficiais: "Processo Captação de
+       Locação" (locador: passo a passo, serviços da administração,
+       docs do locador e documentos oficiais da etapa) e "Processo p/
+       Propensos Inquilinos" (locatário: efetivação, docs do locatário
+       e do fiador, proposta obrigatória e contrato preliminar).
+     - 1.0.0 (24/07/2026): Sistema renomeado para GRI-SO; nova aba
+       Ficha de Captação de Locação; nova aba Procedimentos de
+       Locação (conteúdo oficial dos procedimentos e listas de
+       documentação: locador, locatário e fiador).
+     Desenvolvido por André Barros Costa
+     ============================================================ */
+  const APP_VERSION = '1.7.0';
+  // Teclado numérico no celular
+  document.querySelectorAll('.dinheiro, .fone, .cep, .cpf, .qtd, .pct').forEach(el=>{
+    el.setAttribute('inputmode','numeric');
+  });
+  // Máscara de dinheiro
+  document.querySelectorAll('.dinheiro').forEach(el=>{
+    el.addEventListener('input', ()=>{
+      let v = el.value.replace(/\D/g,'');
+      if(!v){ el.value=''; return; }
+      v = (parseInt(v,10)/100).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+      el.value = v;
+    });
+  });
+  // Máscara de telefone
+  document.querySelectorAll('.fone').forEach(el=>{
+    el.addEventListener('input', ()=>{
+      let v = el.value.replace(/\D/g,'').slice(0,11);
+      if(v.length>10) el.value = v.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+      else if(v.length>6) el.value = v.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+      else if(v.length>2) el.value = v.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+      else el.value = v;
+    });
+  });
+  // Máscara de CEP
+  document.querySelectorAll('.cep').forEach(el=>{
+    el.addEventListener('input', ()=>{
+      let v = el.value.replace(/\D/g,'').slice(0,8);
+      el.value = v.length>5 ? v.replace(/(\d{5})(\d{0,3})/, '$1-$2') : v;
+    });
+  });
+  // Máscara de CPF
+  document.querySelectorAll('.cpf').forEach(el=>{
+    el.addEventListener('input', ()=>{
+      let v = el.value.replace(/\D/g,'').slice(0,11);
+      if(v.length>9) el.value = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+      else if(v.length>6) el.value = v.replace(/(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
+      else if(v.length>3) el.value = v.replace(/(\d{3})(\d{0,3})/, '$1.$2');
+      else el.value = v;
+    });
+  });
+  // Navegação por abas
+  function mudarAba(qual){
+    document.querySelectorAll('.aba').forEach(a=>a.classList.remove('ativa'));
+    document.querySelectorAll('.abas-nav button').forEach(b=>b.classList.remove('ativa'));
+    document.getElementById('aba-'+qual).classList.add('ativa');
+    document.getElementById('btn-aba-'+qual).classList.add('ativa');
+    window.scrollTo(0,0);
+  }
+  // Logo da aba de proposta (reusa a mesma imagem do cabeçalho)
+  document.querySelectorAll('.logo-gr').forEach(img=>{
+    img.src = document.querySelector('.cabecalho img').src;
+  });
+  // Pares SIM/NÃO exclusivos
+  document.querySelectorAll('label.chk input[name]').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      if(cb.checked && !['tipo','ptipo','loctipo'].includes(cb.name)){
+        document.querySelectorAll('input[name="'+cb.name+'"]').forEach(o=>{ if(o!==cb) o.checked=false; });
+      }
+    });
+  });
+  // Grava os valores digitados dentro do próprio HTML (para salvar e imprimir)
+  function fixarValores(){
+    document.querySelectorAll('input[type=text]').forEach(el=>el.setAttribute('value', el.value));
+    document.querySelectorAll('input[type=checkbox]').forEach(el=>{
+      el.checked ? el.setAttribute('checked','checked') : el.removeAttribute('checked');
+    });
+    document.querySelectorAll('textarea').forEach(el=>{ el.textContent = el.value; });
+  }
+  // Imprimir / Salvar PDF
+  function imprimir(){
+    fixarValores();
+    try{ window.print(); }
+    catch(e){
+      alert('A impressão foi bloqueada aqui. Abra este arquivo no Chrome, Edge ou Safari e tente de novo — ou use o menu do navegador > Imprimir.');
+    }
+  }
+  window.addEventListener('beforeprint', fixarValores);
+  // Salvar cópia preenchida (baixa um novo HTML com tudo que foi digitado)
+  function salvar(){
+    fixarValores();
+    try{
+      const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+      const a = document.createElement('a');
+      const abaAtiva = document.querySelector('.aba.ativa').id;
+      const codEl = document.getElementById('f_cod');
+      const cod = ((codEl && codEl.value) || 'sem_cod').replace(/[^\w\-]+/g,'_');
+      const prefixos = {
+        'aba-captacao': 'ficha_captacao_',
+        'aba-proposta': 'proposta_compra_',
+        'aba-proc-captacao': 'processo_captacao_locacao_',
+        'aba-proc-inquilinos': 'processo_propensos_inquilinos_',
+        'aba-contrato-adm': 'contrato_administracao_locacao_',
+        'aba-proposta-loc': 'proposta_locacao_',
+        'aba-contrato-prel': 'contrato_preliminar_locacao_'
+      };
+      const prefixo = prefixos[abaAtiva] || 'gri-so_';
+      a.href = URL.createObjectURL(blob);
+      a.download = prefixo + cod + '.html';
+      document.body.appendChild(a); a.click(); a.remove();
+    }catch(e){
+      alert('O download foi bloqueado aqui. Abra este arquivo no navegador (Chrome/Edge/Safari) e tente de novo.');
+    }
+  }
+  // Limpar somente a aba aberta
+  function limpar(){
+    const aba = document.querySelector('.aba.ativa');
+    const nomes = {
+      'aba-captacao': 'da Ficha de Captação',
+      'aba-proposta': 'da Proposta de Compra',
+      'aba-proc-captacao': 'do Processo de Captação de Locação',
+      'aba-proc-inquilinos': 'do Processo para Propensos Inquilinos',
+      'aba-contrato-adm': 'do Contrato de Administração',
+      'aba-proposta-loc': 'da Proposta de Locação',
+      'aba-contrato-prel': 'do Contrato Preliminar'
+    };
+    const nome = nomes[aba.id] || 'da aba atual';
+    if(!confirm('Limpar todos os campos ' + nome + '?')) return;
+    aba.querySelectorAll('input[type=text], textarea').forEach(el=>{ el.value=''; el.removeAttribute('value'); el.textContent=''; });
+    aba.querySelectorAll('input[type=checkbox]').forEach(el=>{ el.checked=false; el.removeAttribute('checked'); });
+  }
+</script>
+</body>
+</html>
