@@ -260,7 +260,7 @@
 <body>
 
 <div class="acoes">
-  <span style="font:bold 15px Arial,sans-serif;color:var(--azul);letter-spacing:1px">GRI-SO <small style="font-size:10px;color:#888;font-weight:normal">v1.5.1</small></span>
+  <span style="font:bold 15px Arial,sans-serif;color:var(--azul);letter-spacing:1px">GRI-SO <small style="font-size:10px;color:#888;font-weight:normal">v1.8.0</small></span>
   <button class="btn-imprimir" onclick="imprimir()" title="Imprime a aba que estiver aberta">🖨️ Imprimir / Salvar PDF</button>
   <button class="btn-imprimir" style="background:#fff;color:var(--azul)" onclick="salvar()">💾 Salvar preenchida</button>
   <button class="btn-limpar" onclick="limpar()">Limpar</button>
@@ -272,6 +272,7 @@
   <span class="grupo-aba">Captação de Imóveis</span>
   <button id="btn-aba-captacao" class="ativa" onclick="mudarAba('captacao')">📋 Ficha de Captação (Venda e Locação)</button>
   <button id="btn-aba-proposta" onclick="mudarAba('proposta')">🏠 Proposta de Compra</button>
+  <button id="btn-aba-contraproposta" onclick="mudarAba('contraproposta')">📝 Contraproposta de Compra</button>
   <span class="grupo-aba">Locação — Processo de Captação (Locador)</span>
   <button id="btn-aba-proc-captacao" onclick="mudarAba('proc-captacao')">🗂️ Procedimentos de Captação</button>
   <span class="grupo-aba">Locação — Processo p/ Propensos Inquilinos (Locatário)</span>
@@ -691,6 +692,113 @@
   </div>
 
 </div><!-- /aba-proposta -->
+
+<!-- ================================================== -->
+<!-- ===== ABA: CONTRAPROPOSTA DE COMPRA ============== -->
+<!-- ================================================== -->
+<div class="aba" id="aba-contraproposta">
+
+  <div class="cabecalho">
+    <img src="" alt="Gilberto Rocha Imóveis — CRECI J-1285" class="logo-gr">
+    <div style="flex:1">
+      <div class="titulo-doc">CONTRAPROPOSTA&nbsp;&nbsp;DE&nbsp;&nbsp;COMPRA&nbsp;&nbsp;DE&nbsp;&nbsp;IMÓVEL</div>
+    </div>
+  </div>
+
+  <p class="intro">Em resposta à proposta de compra apresentada, o(a) proprietário(a)/vendedor(a) registra a
+  contraproposta abaixo para análise do(a) proponente comprador(a), por meio do(a) Corretor(a) de Imóveis
+  <input type="text" class="lacuna" style="width:190px"> CRECI-RO <input type="text" class="lacuna" style="width:70px">.</p>
+
+  <table>
+    <tr><td colspan="12" class="secao">REFERÊNCIA DA PROPOSTA ORIGINAL</td></tr>
+    <tr>
+      <td colspan="3"><div class="par"><span class="rotulo">Data:</span><input type="text"></div></td>
+      <td colspan="9"><div class="par"><span class="rotulo">Imóvel / Endereço:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="7"><div class="par"><span class="rotulo">Proponente comprador:</span><input type="text"></div></td>
+      <td colspan="5"><div class="par"><span class="rotulo">Valor originalmente proposto (R$):</span><input type="text" class="dinheiro"></div></td>
+    </tr>
+  </table>
+
+  <table>
+    <tr><td colspan="12" class="secao">PROPONENTE DA CONTRAPROPOSTA — VENDEDOR(A)</td></tr>
+    <tr>
+      <td colspan="7"><div class="par"><span class="rotulo">Nome:</span><input type="text"></div></td>
+      <td colspan="5"><div class="par"><span class="rotulo">CPF:</span><input type="text" class="cpf" maxlength="14"></div></td>
+    </tr>
+    <tr>
+      <td colspan="5"><div class="par"><span class="rotulo">RG / Órgão emissor:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">Telefone:</span><input type="text" class="fone" maxlength="15"></div></td>
+      <td colspan="4"><div class="par"><span class="rotulo">E-mail:</span><input type="text"></div></td>
+    </tr>
+  </table>
+
+  <table>
+    <tr><td colspan="12" class="secao">VALOR E CONDIÇÕES DA CONTRAPROPOSTA</td></tr>
+    <tr>
+      <td colspan="3"><div class="par"><span class="rotulo">Valor total (R$):</span><input type="text" class="dinheiro"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">Sinal de negócio (R$):</span><input type="text" class="dinheiro"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">Recursos próprios (R$):</span><input type="text" class="dinheiro"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">Financiamento (R$):</span><input type="text" class="dinheiro"></div></td>
+    </tr>
+    <tr>
+      <td colspan="4"><div class="par"><span class="rotulo">FGTS (R$):</span><input type="text" class="dinheiro"></div></td>
+      <td colspan="8"><div class="par"><span class="rotulo">Outros recursos / descrição:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="12"><span class="rotulo">Forma e cronograma de pagamento:</span>
+        <textarea style="min-height:38px" aria-label="Forma e cronograma de pagamento"></textarea></td>
+    </tr>
+  </table>
+
+  <table>
+    <tr><td colspan="12" class="secao">VALIDADE E PRAZOS</td></tr>
+    <tr>
+      <td colspan="4"><div class="par"><span class="rotulo">Válida até (data):</span><input type="text"></div></td>
+      <td colspan="2"><div class="par"><span class="rotulo">Hora:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">Assinatura até:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">Entrega / posse:</span><input type="text"></div></td>
+    </tr>
+  </table>
+
+  <table>
+    <tr><td colspan="12" class="secao">CONDIÇÕES ADICIONAIS</td></tr>
+    <tr><td colspan="12"><textarea style="min-height:42px" aria-label="Condições adicionais"></textarea></td></tr>
+  </table>
+
+  <table>
+    <tr><td colspan="12" class="secao">MANIFESTAÇÃO DO COMPRADOR</td></tr>
+    <tr>
+      <td colspan="7">
+        <label class="chk"><input type="checkbox" name="contraaceite"> Aceito a contraproposta</label>
+        <label class="chk"><input type="checkbox" name="contraaceite"> Não aceito</label>
+      </td>
+      <td colspan="5"><div class="par"><span class="rotulo">Data:</span><input type="text"></div></td>
+    </tr>
+    <tr>
+      <td colspan="6"><div class="par"><span class="rotulo">Nome do comprador:</span><input type="text"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">CPF:</span><input type="text" class="cpf" maxlength="14"></div></td>
+      <td colspan="3"><div class="par"><span class="rotulo">Telefone:</span><input type="text" class="fone" maxlength="15"></div></td>
+    </tr>
+  </table>
+
+  <div class="data-linha">Porto Velho/RO, <input type="text" class="lacuna" style="width:42px"> de
+  <input type="text" class="lacuna" style="width:125px"> de 20<input type="text" class="lacuna" style="width:34px">.</div>
+
+  <div class="ass-duplas">
+    <div class="bloco"><div class="tra"></div>Proprietário(a) / Vendedor(a)</div>
+    <div class="bloco"><div class="tra"></div>Proponente Comprador(a)</div>
+    <div class="bloco"><div class="tra"></div>Corretor(a) de Imóveis / CRECI</div>
+  </div>
+
+  <div class="rodape">
+    Rocha e Souza Negócios Imobiliários Ltda. CNPJ 12.677.271/0001-65 CRECI – J 1285<br>
+    Rua Venezuela, 2463 - Bairro Embratel - Porto Velho/RO<br>
+    Telefone (69) 3224-6868 (Recepção) / (69) 9 9341-9663 (Locação) / (69) 9 9910-6868 (Vendas)
+  </div>
+
+</div><!-- /aba-contraproposta -->
 
 <!-- ================================================== -->
 <!-- ===== ABA ÚNICA: FICHA DE CAPTAÇÃO (VENDA E LOCAÇÃO) ===== -->
@@ -1716,8 +1824,10 @@
 <script>
   /* ============================================================
      GRI-SO — Gilberto Rocha Imóveis · Sistema Operacional
-     APP_VERSION: 1.7.0
+     APP_VERSION: 1.8.0
      CHANGELOG:
+     - 1.8.0 (04/10/2026): Incluída a aba de Contraproposta de Compra,
+       integrada à navegação, impressão, salvamento e limpeza da ficha.
      - 1.7.0 (07/08/2026): Amenidades da ficha única exibidas como
        opções clicáveis para venda e locação; removidas da tela
        as áreas livres de digitação.
@@ -1756,7 +1866,7 @@
        documentação: locador, locatário e fiador).
      Desenvolvido por André Barros Costa
      ============================================================ */
-  const APP_VERSION = '1.7.0';
+  const APP_VERSION = '1.8.0';
   // Teclado numérico no celular
   document.querySelectorAll('.dinheiro, .fone, .cep, .cpf, .qtd, .pct').forEach(el=>{
     el.setAttribute('inputmode','numeric');
@@ -1847,6 +1957,7 @@
       const prefixos = {
         'aba-captacao': 'ficha_captacao_',
         'aba-proposta': 'proposta_compra_',
+        'aba-contraproposta': 'contraproposta_compra_',
         'aba-proc-captacao': 'processo_captacao_locacao_',
         'aba-proc-inquilinos': 'processo_propensos_inquilinos_',
         'aba-proposta-loc': 'proposta_locacao_',
@@ -1866,6 +1977,7 @@
     const nomes = {
       'aba-captacao': 'da Ficha de Captação',
       'aba-proposta': 'da Proposta de Compra',
+      'aba-contraproposta': 'da Contraproposta de Compra',
       'aba-proc-captacao': 'do Processo de Captação de Locação',
       'aba-proc-inquilinos': 'do Processo para Propensos Inquilinos',
       'aba-proposta-loc': 'da Proposta de Locação',
